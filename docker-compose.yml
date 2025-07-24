@@ -1,0 +1,62 @@
+services:
+  bot:
+    container_name: V2RayBot-bot
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://V2RayBot:b97bc2552177ddb7b137fd34@postgres:5432/V2RayBot
+      - REDIS_URL=redis://redis:6379
+    env_file:
+      - ./.env
+      - ./.env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - vpnbot-net
+
+  postgres:
+    container_name: V2RayBot-postgres
+    image: postgres:15-alpine  
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-V2RayBot}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-V2RayBot}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U V2RayBot -d V2RayBot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vpnbot-net
+
+  redis:
+    container_name: V2RayBot-redis
+    image: redis:7-alpine  # Pinned version
+    command: ["redis-server", "--maxmemory-policy", "noeviction"]
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vpnbot-net
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  vpnbot-net:
+    driver: bridge

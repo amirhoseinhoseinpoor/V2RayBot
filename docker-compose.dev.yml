@@ -1,0 +1,45 @@
+services:
+  postgres:
+    container_name: V2RayBot-postgres
+    image: postgres:15-alpine  # Pinned version for stability
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER:-V2RayBot}  # From .env
+      - POSTGRES_PASSWORD=${DB_PASSWORD}     # Required from .env
+      - POSTGRES_DB=${DB_NAME:-V2RayBot}
+    ports:
+      - "5432:5432"  # Exposed for local tools
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-V2RayBot} -d ${DB_NAME:-V2RayBot}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vpnbot-net
+
+  redis:
+    container_name: V2RayBot-redis
+    image: redis:7-alpine  # Pinned version
+    command: ["redis-server", "--maxmemory-policy", "noeviction"]
+    restart: unless-stopped
+    ports:
+      - "6379:6379"  # Exposed for local debugging
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vpnbot-net
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  vpnbot-net:
+    driver: bridge
