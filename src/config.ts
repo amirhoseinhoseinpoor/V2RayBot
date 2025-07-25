@@ -1,4 +1,10 @@
+import * as dotenv from 'dotenv';
 import env from "env-var";
+
+// Load .env file in development
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 export const config = {
 	NODE_ENV: env
@@ -6,7 +12,8 @@ export const config = {
 	.default("development")
 	.asEnum(["production", "test", "development"]),
 	BOT_TOKEN: env.get("BOT_TOKEN").required().asString(),
-	
+
+	IS_DOCKER: env.get("IS_DOCKER").default("false").asBool(),
 
 	PORT: env.get("PORT").default(3000).asPortNumber(),
 API_URL: env.get("API_URL").default(`https://${env.get("PUBLIC_DOMAIN").asString()}`).asString(),

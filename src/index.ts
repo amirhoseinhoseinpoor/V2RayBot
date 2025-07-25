@@ -1,31 +1,41 @@
-import { bot } from "./bot.ts"
-import { config } from "./config.ts"
-import { fastify } from "./webhook.ts"
-const signals = ["SIGINT", "SIGTERM"];
+import { bot } from "./bot.js";
+import { config } from "./config.js";
+import { fastify } from "./webhook.js";
 
-for (const signal of signals) {
-    process.on(signal, async () => {
-        console.log(`Received ${signal}. Initiating graceful shutdown...`);
-        await fastify.close()
-        await bot.stop()
-        process.exit(0);
-    })
+export async function startBot() {
+  // Error handling first
+  process.on("uncaughtException", (error) => {
+    console.error("FATAL:", error);
+    process.exit(1);
+  });
+
+  // Graceful shutdown
+  const signals = ["SIGINT", "SIGTERM"] as const;
+  signals.forEach(signal => process.on(signal, gracefulShutdown));
+
+  // Start based on environment
+  if (config.NODE_ENV === "production") {
+    await startWebhookMode();
+  } else {
+    await startPollingMode();
+  }
 }
-    
-process.on("uncaughtException", (error) => {
-    console.error("Uncaught exception:", error);
-})
 
-process.on("unhandledRejection", (error) => {
-    console.error("Unhandled rejection:", error);
-})
-    
-await fastify.listen({ port: config.PORT })
-console.log(`Listening on port ${config.PORT}`)
-if (config.NODE_ENV === "production")
-    await bot.start({
-        webhook: {
-            url: `${config.API_URL}/${config.BOT_TOKEN}`,
-        },
-    });
-else await bot.start();
+async function startWebhookMode() {
+  await fastify.listen({ port: config.PORT, host: "0.0.0.0" });
+  console.log(`Webhook listening on port ${config.PORT}`);
+}
+
+async function startPollingMode() {
+  await bot.start({
+    allowedUpdates: ["message", "callback_query"],
+    dropPendingUpdates: true
+  });
+  console.log("Bot running in polling mode");
+}
+
+async function gracefulShutdown() {
+  await fastify?.close();
+  await bot.stop();
+  process.exit(0);
+}

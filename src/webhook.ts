@@ -1,6 +1,6 @@
 import Fastify from "fastify"
-import { config } from "./config.ts"
-import { bot } from "./bot.ts"
+import { config } from "./config.js"
+import { bot } from "./bot.js"
 import { webhookHandler } from "gramio"
 
 export const fastify = Fastify()

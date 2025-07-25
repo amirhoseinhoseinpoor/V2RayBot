@@ -1,8 +1,8 @@
 import { Verrou } from "@verrou/core"
-   import { config } from "../config.ts"
+   import { config } from "../config.js"
    import { memoryStore } from '@verrou/core/drivers/memory'
    import { redisStore } from '@verrou/core/drivers/redis'
-   import { redis } from './redis.ts'
+   import { redis } from './redis.js'
 
    export const verrou = new Verrou({
        default: config.LOCK_STORE,

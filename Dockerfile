@@ -11,7 +11,7 @@ RUN npm ci
 FROM base AS builder
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN npm run build && ls -la /usr/src/app/dist
 
 # Stage 4: Production image
 FROM base AS production
@@ -21,4 +21,4 @@ COPY --from=builder /usr/src/app/dist ./dist
 COPY package.json .
 
 # Fix entrypoint
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]

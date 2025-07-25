@@ -1,21 +1,22 @@
 {
   "compilerOptions": {
-    "lib": [
-      "ESNext"
-    ],
-    "module": "ESNext",
     "target": "ESNext",
-    "esModuleInterop": true,
-    "moduleResolution": "Bundler",
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
-    "skipLibCheck": true,
+    "lib": ["ESNext"],
+    "rootDir": "./src",
+    "module": "node16",
+    "moduleResolution": "node16",
+    "resolveJsonModule": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "noEmit": false,
+    "outDir": "./dist",
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "noUncheckedIndexedAccess": true
+    "skipLibCheck": true
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }
