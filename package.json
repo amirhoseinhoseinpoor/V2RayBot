@@ -11,7 +11,7 @@
     "prisma:seed": "ts-node --esm prisma/seed.ts",
     "start": "node dist/bot.js",
     "lint": "npx eslint",
-    "lint:fix": "npm run lint --fix",
+    "lint:fix": "eslint . --ext .ts --fix",
     "prepare": "husky",
     "build": "rimraf dist && tsc"
   },
