@@ -8,8 +8,42 @@ datasource db {
 }
 
 model User {
+  id           Int      @id @default(autoincrement())
+  telegramId   BigInt   @unique
+  username     String?  // Optional, in case the user has no username
+  firstName    String?
+  freeAccount  Boolean  @default(false)
+
+  vpns           VPN[]    // One-to-many
+
+  createdAt    DateTime @default(now())
+}
+
+model VPN {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id])
+  email          String   @unique  // v2ray email identifier
+  uuid           String   // V2Ray user ID
+  alterId        Int      @default(0)
+  createdAt      DateTime @default(now())
+  type           VPNType  // 'free' or 'paid'
+  expiresAt      DateTime?
+  expired        Boolean  @default(false)
+
+  trafficLogs    Traffic[]  // hourly traffic snapshots
+}
+
+model Traffic {
   id        Int      @id @default(autoincrement())
-  userId    BigInt   @unique
-  createdAt DateTime @default(now())
-  config    String?
+  vpnId     Int
+  vpn       VPN      @relation(fields: [vpnId], references: [id])
+  uplink    BigInt   @default(0)
+  downlink  BigInt   @default(0)
+  timestamp DateTime @default(now())
+}
+
+enum VPNType {
+  free
+  paid
 }

@@ -1,6 +1,5 @@
 import { Bot } from "gramio";
 import { config } from "./config.js";
-import { InlineKeyboard } from "gramio";
 import { autoAnswerCallbackQuery } from "@gramio/auto-answer-callback-query";
 import { autoRetry } from "@gramio/auto-retry";
 import { mediaCache } from "@gramio/media-cache";
@@ -14,6 +13,8 @@ import { redis } from "./services/redis.js";
 import { registerMenuHandlers } from "./handlers/mainMenu/index.js";
 // import keyboards
 import { mainMenuKeyboard } from "./shared/keyboards/mainMenu.js";
+// import services
+import { findOrCreateUser } from "./services/mainServices/user.js";
 
 if (redis.status !== "ready" && redis.status !== "connecting") {
   await redis.connect();
@@ -36,7 +37,14 @@ export const bot = new Bot(config.BOT_TOKEN)
 registerMenuHandlers(bot);
 
 bot
-  .command("start", (ctx) => {
+  .command("start", async (ctx) => {
+    const tgUser = ctx.from;
+    console.log(tgUser);
+
+    if (!tgUser) return;
+
+    await findOrCreateUser(tgUser);
+
     const name = ctx.from?.firstName || "کاربر";
 
     return ctx.send(
