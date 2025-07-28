@@ -10,6 +10,6 @@ export async function connectSSH() {
   await ssh.connect({
     host: process.env.VPS_HOST!,
     username: process.env.VPS_USER!,
-    privateKey: process.env.VPS_PASSWORD!,
+    password: process.env.VPS_PASSWORD!,
   });
 }
