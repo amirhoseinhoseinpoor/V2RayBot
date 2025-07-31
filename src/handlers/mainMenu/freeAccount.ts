@@ -1,9 +1,7 @@
-import { prisma } from './../../db/index.js';
-import { generateFreeAccountConfig } from '../../services/configGenerate/freeConfig.js';
+import { prisma } from "./../../db/index.js";
+import { generateConfig } from "../../services/configGenerate/generateConfig.js";
 import { MessageContext } from "gramio";
 import { type Bot } from "gramio";
-
-
 
 export async function handleFreeAccountRequest(ctx: any) {
   const telegramId = ctx.from?.id.toString();
@@ -16,7 +14,7 @@ export async function handleFreeAccountRequest(ctx: any) {
       data: {
         telegramId,
         username: ctx.from?.username,
-        firstName: ctx.from?.first_name
+        firstName: ctx.from?.first_name,
       },
     });
   }
@@ -25,7 +23,10 @@ export async function handleFreeAccountRequest(ctx: any) {
     return ctx.reply("❌ شما قبلاً از حساب رایگان استفاده کرده‌اید.");
   }
 
-  const { config, email, uuid, alterId } = await generateFreeAccountConfig(telegramId);
+  const { config, email, uuid, alterId } = await generateConfig(
+    telegramId,
+    "free"
+  );
 
   await prisma.vPN.create({
     data: {

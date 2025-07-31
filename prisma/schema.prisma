@@ -8,30 +8,54 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  telegramId   BigInt   @unique
-  username     String?  // Optional, in case the user has no username
-  firstName    String?
-  freeAccount  Boolean  @default(false)
+  id          Int     @id @default(autoincrement())
+  telegramId  BigInt  @unique
+  username    String? // Optional, in case the user has no username
+  firstName   String?
+  freeAccount Boolean @default(false)
 
-  vpns           VPN[]    // One-to-many
+  vpns VPN[] // One-to-many
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime  @default(now())
+  Payment   Payment[]
+}
+
+model Plan {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  duration    Int // Duration in days
+  trafficGB   Int // Traffic limit in GB
+  price       Float
+  Payment     Payment[]
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  planId    Int
+  amount    Float
+  receipt   String // Telegram file_id of receipt
+  status    String // "pending", "confirmed", "rejected"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  plan      Plan     @relation(fields: [planId], references: [id])
 }
 
 model VPN {
-  id             Int      @id @default(autoincrement())
-  userId         Int
-  user           User     @relation(fields: [userId], references: [id])
-  email          String   @unique  // v2ray email identifier
-  uuid           String   // V2Ray user ID
-  alterId        Int      @default(0)
-  createdAt      DateTime @default(now())
-  type           VPNType  // 'free' or 'paid'
-  expiresAt      DateTime?
-  expired        Boolean  @default(false)
-
-  trafficLogs    Traffic[]  // hourly traffic snapshots
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  user         User      @relation(fields: [userId], references: [id])
+  email        String    @unique // v2ray email identifier
+  uuid         String // V2Ray user ID
+  alterId      Int       @default(0)
+  createdAt    DateTime  @default(now())
+  type         VPNType // 'free' or 'paid'
+  expiresAt    DateTime?
+  expired      Boolean   @default(false)
+  trafficLimit BigInt    @default(0)
+  trafficLogs  Traffic[] // hourly traffic snapshots
 }
 
 model Traffic {

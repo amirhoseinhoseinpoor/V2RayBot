@@ -1,28 +1,28 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../src/db/index.js";
+import { VPN_PLANS } from "../src/constants/plans.js";
 
 async function main() {
-  try {
-    console.log("Seeding started");
-
-    const user = await prisma.user.upsert({
-      where: { email: "test@example.com" },
+  for (const plan of VPN_PLANS) {
+    await prisma.plan.upsert({
+      where: { id: plan.id },
       update: {},
       create: {
-        name: "Test User",
-        email: "test@example.com",
+        id: plan.id,
+        name: plan.name,
+        price: plan.price,
+        trafficGB: plan.trafficGB,
+        duration: plan.duration,
+        description: plan.description,
       },
     });
-
-    console.log("Created user:", user);
-    console.log("Seeding finished");
-  } catch (error) {
-    console.error("Seed error:", error);
-    process.exit(1); // Exit on error so you know something went wrong
-  } finally {
-    await prisma.$disconnect();
   }
+
+  console.log("✅ Plans seeded!");
 }
 
-main();
+main()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error("❌ Seed failed:", err);
+    process.exit(1);
+  });

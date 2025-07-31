@@ -9,8 +9,11 @@ import { greetingScene } from "./scenes/greeting.js";
 import { paginationFor } from "@gramio/pagination/plugin";
 import { redisStorage } from "@gramio/storage-redis";
 import { redis } from "./services/redis.js";
+
 // handler
 import { registerMenuHandlers } from "./handlers/mainMenu/index.js";
+import { registerBuyServiceHandlers } from "./handlers/mainMenu/registerBuyService.js";
+import { registerAdminHandlers } from "./handlers/admin/registerAdmin.js";
 // import keyboards
 import { mainMenuKeyboard } from "./shared/keyboards/mainMenu.js";
 // import services
@@ -26,7 +29,12 @@ export const bot = new Bot(config.BOT_TOKEN)
   .extend(autoAnswerCallbackQuery())
   .extend(autoRetry())
   .extend(mediaCache())
-  .extend(session({ storage }))
+  .extend(
+    session({
+      key: "sessionKey",
+      initial: () => ({})
+    })
+  )
   .extend(
     scenes([greetingScene], {
       storage,
@@ -35,10 +43,14 @@ export const bot = new Bot(config.BOT_TOKEN)
   .extend(paginationFor([]));
 
 registerMenuHandlers(bot);
+registerBuyServiceHandlers(bot);
+registerAdminHandlers(bot);
+
 
 bot
   .command("start", async (ctx) => {
     const tgUser = ctx.from;
+
     console.log(tgUser);
 
     if (!tgUser) return;
