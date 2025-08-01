@@ -28,18 +28,26 @@ interface VMessConfig {
   limit?: number;
 }
 
-export async function generateConfig(
-  telegramId: bigint,
-  accountType: "free" | "paid",
-  trafficLimit?: number
-): Promise<{
+export async function generateConfig({
+  telegramId,
+  accountType,
+  trafficLimit,
+  name
+}: {
+  telegramId: bigint;
+  accountType: "free" | "paid";
+  trafficLimit?: number;
+  name?: string;
+}): Promise<{
   config: string;
   uuid: string;
   email: string;
   alterId: number;
+  name?: string;
 }> {
   const uuid = uuidv4();
-  const email = `${accountType || "free"}-${telegramId}@vpn.test`;
+  const safeName = (name || "").replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 15);
+  const email = `${accountType || "free"}-${telegramId}-${safeName || ""}-${uuid.slice(0, 6)}@vpn.test`;
   const userObject: V2RayUser = {
     id: uuid,
     alterId: 0,

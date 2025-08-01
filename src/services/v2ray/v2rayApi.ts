@@ -5,7 +5,7 @@ dotenv.config();
 export async function getAllTrafficStats(): Promise<string> {
   await connectSSH();
 
-  const cmd = process.env.V2RAY_STATS_COMMAND!;
+  const cmd = `/usr/bin/v2ray api stats --server=127.0.0.1:32889`;
   const result = await ssh.execCommand(cmd);
 
   if (result.stderr) {

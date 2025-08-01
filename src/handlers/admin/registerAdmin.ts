@@ -35,9 +35,11 @@ export function registerAdminHandlers(bot: Bot) {
     try {
       // Generate V2Ray configuration
       const v2rayConfig = await generateConfig(
-        payment.user.telegramId,
-        "paid",
-        payment.plan.trafficGB // Pass the raw GB value (number)
+        {
+          telegramId : payment.user.telegramId,
+          accountType: "paid",
+          trafficLimit: payment.plan.trafficGB,
+        }
       );
 
       // Create VPN record

@@ -23,10 +23,11 @@ export async function handleFreeAccountRequest(ctx: any) {
     return ctx.reply("❌ شما قبلاً از حساب رایگان استفاده کرده‌اید.");
   }
 
-  const { config, email, uuid, alterId } = await generateConfig(
-    telegramId,
-    "free"
-  );
+  const { config, email, uuid, alterId } = await generateConfig({
+    telegramId: telegramId,
+    accountType: "free",
+    name: ctx.from?.username,
+  });
 
   await prisma.vPN.create({
     data: {
