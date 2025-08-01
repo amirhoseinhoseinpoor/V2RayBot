@@ -76,6 +76,8 @@ export function registerAdminHandlers(bot: Bot) {
 
       // Update admin UI
       await bot.api.editMessageCaption({
+        chat_id: ctx.message.chat.id,
+        message_id: ctx.message?.id,
         caption: `✅ تراکنش تایید شد #${paymentId}`,
       });
       await ctx.answerCallbackQuery({ text: "VPN ایجاد شد و کاربر مطلع شد!" });
@@ -103,11 +105,14 @@ export function registerAdminHandlers(bot: Bot) {
         "1. مبلغ صحیح پرداخت نشده\n" +
         "2. رسید واضح نیست\n" +
         "3. جزئیات کارت مطابقت ندارد\n\n" +
-        "لطفا رسید را دوباره ارسال کنید یا با پشتیبانی تماس بگیرید.",
+        "لطفا دوباره ثبت سفارش کنید یا با پشتیبانی تماس بگیرید .",
     });
 
     // Update admin UI
     await bot.api.editMessageCaption({
+      chat_id: ctx.message.chat.id,
+      message_id: ctx.message?.id,
+
       caption: `❌ Rejected Payment #${paymentId}`,
     });
     await ctx.answerCallbackQuery({ text: "کاربر مطلع شد. که دوباره بفرسته" });

@@ -32,7 +32,7 @@ export const bot = new Bot(config.BOT_TOKEN)
   .extend(
     session({
       key: "sessionKey",
-      initial: () => ({})
+      initial: () => ({}),
     })
   )
   .extend(
@@ -42,16 +42,9 @@ export const bot = new Bot(config.BOT_TOKEN)
   )
   .extend(paginationFor([]));
 
-registerMenuHandlers(bot);
-registerBuyServiceHandlers(bot);
-registerAdminHandlers(bot);
-
-
 bot
   .command("start", async (ctx) => {
     const tgUser = ctx.from;
-
-    console.log(tgUser);
 
     if (!tgUser) return;
 
@@ -60,7 +53,7 @@ bot
     const name = ctx.from?.firstName || "کاربر";
 
     return ctx.send(
-      `🎉 سلام کاربر ${name} به ربات خوش آمدید\n \n ▫️ارائه کانفیگ های اختصاصی پرسرعت با پشتیبانی\n \n ▫️قابل استفاده بر روی چند دستگاه هم زمان\n\n ▫️قابل استفاده بر روی : \n\n ▫️اندروید\n ▫️ایفون\n ▫️ویندوز\n\n\n 📣کانال اطلاعیه : @v2raychannel \n\n 👤 پشتیبانی تمام وقت : @sfsdfawkdfksd \n\n\n`,
+      `🎉 سلام کاربر ${name} به ربات خوش آمدید\n \n ▫️ارائه کانفیگ های اختصاصی پرسرعت با پشتیبانی\n \n ▫️قابل استفاده بر روی چند دستگاه هم زمان\n\n ▫️قابل استفاده بر روی : \n\n ▫️اندروید\n ▫️ایفون\n ▫️ویندوز\n\n\n 📣کانال اطلاعیه : @VIPV2RayNG_config \n\n 👤 پشتیبانی تمام وقت : @VIPV2RayNG_config_S \n\n\n`,
       {
         reply_markup: mainMenuKeyboard,
       }
@@ -73,3 +66,7 @@ bot.start().catch((err) => {
   console.error("❌ Bot failed to start:", err);
   process.exit(1);
 });
+
+registerMenuHandlers(bot);
+registerBuyServiceHandlers(bot);
+registerAdminHandlers(bot);

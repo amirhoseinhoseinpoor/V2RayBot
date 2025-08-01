@@ -19,14 +19,14 @@ export function registerBuyServiceHandlers(bot: Bot) {
     }
 
     const paymentInfo = `
-💳 *مشخصات پرداخت*
+💳 *مشخصات پرداخت*\n
 vpn: ${plan.name}
 حجم: ${plan.trafficGB === 999 ? "نامحدود" : `${plan.trafficGB}GB`}
 مدت: ${plan.duration} روز
-مبلغ: $${plan.price} تومان
+مبلغ: ${plan.price}T تومان
 
-1. لطفا $${plan.price} به شماره کارت زیر واریز کنید:
-   💳 شماره کارت: \`5029381042707133\`
+1. لطفا ${plan.price}T به شماره کارت زیر واریز کنید:\n
+   💳 شماره کارت: \`5029381042707133\`\n
    👤 به نام: امیرحسین حسین پور
    🏦 بانک: دی
 
@@ -116,7 +116,7 @@ vpn: ${plan.name}
         `📋 vpn: ${plan.name}\n` +
         `📦 حجم: ${plan.trafficGB}GB\n` +
         `⏳ مدت: ${plan.duration} روز\n` +
-        `💰 مبلغ: $${plan.price}\n` +
+        `💰 مبلغ: ${plan.price}T\n` +
         `📝 Payment ID: ${payment.id}`,
       reply_markup: paymentAdminKeyboard(payment.id),
     });

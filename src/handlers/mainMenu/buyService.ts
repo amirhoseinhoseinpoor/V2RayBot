@@ -13,11 +13,11 @@ export async function BuyServiceHandler(ctx: any) {
 
   VPN_PLANS.forEach((plan) => {
     keyboard
-      .text(`${plan.name} - $${plan.price}`, selectPlan.pack({ planId: plan.id }))
+      .text(`${plan.name} - ${plan.price}T`, selectPlan.pack({ planId: plan.id }))
       .row();
   });
 
-  await ctx.reply("📊 vpn مورد نظر خود را انتخاب کنید:", {
+  await ctx.reply("📊  وی پی ان مورد نظر خود را انتخاب کنید:", {
     reply_markup: keyboard,
   });
 }
