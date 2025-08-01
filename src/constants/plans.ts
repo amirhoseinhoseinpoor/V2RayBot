@@ -2,18 +2,18 @@
 export const VPN_PLANS = [
   {
     id: 1,
-    name: "Basic Plan",
+    name: "کانقیگ پایه",
     duration: 30,
     trafficGB: 25,
-    price: 90000,
-    description: "25GB traffic for 30 days"
+    price: 80,
+    description: "25GB اینترینت برای 30 روز"
   },
   {
     id: 2,
-    name: "Pro Plan",
+    name: "کانفیگ پرو",
     duration: 30,
     trafficGB: 50,
-    price: 120000,
-    description: "50GB traffic for 30 days"
+    price: 150,
+    description: "50GB اینترینت برای 30 روز"
   }
 ];

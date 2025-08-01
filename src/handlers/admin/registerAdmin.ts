@@ -22,7 +22,7 @@ export function registerAdminHandlers(bot: Bot) {
     });
 
     if (!payment) {
-      await ctx.answerCallbackQuery({ text: "Payment not found" });
+      await ctx.answerCallbackQuery({ text: "پرداخت یافت نشد" });
       return;
     }
 
@@ -63,25 +63,25 @@ export function registerAdminHandlers(bot: Bot) {
       await bot.api.sendMessage({
         chat_id: payment.user.telegramId.toString(),
         text:
-          `🎉 Payment confirmed! Your premium VPN access:\n\n` +
-          `🧩 Configuration:\n<code>${v2rayConfig.config}</code>\n\n` +
+          `🎉 تراکنش شما تایید شد ! اکانت پرمیوم شما:\n\n` +
+          `🧩 کانفیگ شما (با کیلیک روش کپی میشه):\n\n<code>${v2rayConfig.config}</code>\n\n` +
           `📦 Traffic: ${
             payment.plan.trafficGB === 999
-              ? "Unlimited"
+              ? "نامحدود"
               : `${payment.plan.trafficGB}GB`
           }\n` +
-          `⏳ Expires: ${expiresAt.toLocaleDateString()}`,
+          `⏳ تاریخ پایان: ${expiresAt.toLocaleDateString()}`,
         parse_mode: "HTML",
       });
 
       // Update admin UI
       await bot.api.editMessageCaption({
-        caption: `✅ Approved Payment #${paymentId}`,
+        caption: `✅ تراکنش تایید شد #${paymentId}`,
       });
-      await ctx.answerCallbackQuery({ text: "VPN created and user notified!" });
+      await ctx.answerCallbackQuery({ text: "VPN ایجاد شد و کاربر مطلع شد!" });
     } catch (error) {
       console.error("VPN creation failed:", error);
-      await ctx.answerCallbackQuery({ text: "Error creating VPN" });
+      await ctx.answerCallbackQuery({ text: "خطا در ایجاد VPN" });
     }
   });
 
@@ -99,17 +99,17 @@ export function registerAdminHandlers(bot: Bot) {
     await bot.api.sendMessage({
       chat_id: payment.user.telegramId.toString(),
       text:
-        "❌ Payment rejected. Please verify:\n" +
-        "1. Correct amount was sent\n" +
-        "2. Receipt is clear and valid\n" +
-        "3. Card details match\n\n" +
-        "Resend receipt or contact support",
+        "❌ تراکنش ناموفق! لطفا موارد زیر را برسی کنید:\n\n" +
+        "1. مبلغ صحیح پرداخت نشده\n" +
+        "2. رسید واضح نیست\n" +
+        "3. جزئیات کارت مطابقت ندارد\n\n" +
+        "لطفا رسید را دوباره ارسال کنید یا با پشتیبانی تماس بگیرید.",
     });
 
     // Update admin UI
     await bot.api.editMessageCaption({
       caption: `❌ Rejected Payment #${paymentId}`,
     });
-    await ctx.answerCallbackQuery({ text: "User notified to resend" });
+    await ctx.answerCallbackQuery({ text: "کاربر مطلع شد. که دوباره بفرسته" });
   });
 }

@@ -1,7 +1,11 @@
 // registerBuyServiceHandlers.ts
 import { Bot, InlineKeyboard } from "gramio";
 import { VPN_PLANS } from "../../constants/plans.js";
-import { buyVPN, selectPlan, backToPlans } from "../../shared/callback-data/buyVPN.js";
+import {
+  buyVPN,
+  selectPlan,
+  backToPlans,
+} from "../../shared/callback-data/buyVPN.js";
 import { getSession } from "../../sessionHelper.js";
 import { prisma } from "../../db/index.js";
 import { paymentAdminKeyboard } from "../../shared/keyboards/paymentAdminKeyboard.js";
@@ -15,24 +19,24 @@ export function registerBuyServiceHandlers(bot: Bot) {
     }
 
     const paymentInfo = `
-💳 *Payment Instructions*
-Plan: ${plan.name}
-Traffic: ${plan.trafficGB === 999 ? "Unlimited" : `${plan.trafficGB}GB`}
-Duration: ${plan.duration} days
-Amount: $${plan.price}
+💳 *مشخصات پرداخت*
+vpn: ${plan.name}
+حجم: ${plan.trafficGB === 999 ? "نامحدود" : `${plan.trafficGB}GB`}
+مدت: ${plan.duration} روز
+مبلغ: $${plan.price} تومان
 
-1. Send $${plan.price} to:
-   💳 Card: \`1234 5678 9012 3456\`
-   👤 Name: YOUR NAME
-   🏦 Bank: YOUR BANK
+1. لطفا $${plan.price} به شماره کارت زیر واریز کنید:
+   💳 شماره کارت: \`5029381042707133\`
+   👤 به نام: امیرحسین حسین پور
+   🏦 بانک: دی
 
-2. Take a screenshot of the payment receipt
-3. Upload the receipt here`;
+2. لطفا از رسید پرداخت اسکرین شات بگیرید
+3. رسید را همینجا داخل چت آپلود کنید`;
 
     await ctx.editText(paymentInfo, {
       parse_mode: "Markdown",
       reply_markup: new InlineKeyboard().text(
-        "↩️ Back to plans",
+        "↩️ بازگشت",
         backToPlans.pack("back")
       ),
     });
@@ -47,10 +51,15 @@ Amount: $${plan.price}
   bot.callbackQuery(backToPlans, async (ctx) => {
     const keyboard = new InlineKeyboard();
     VPN_PLANS.forEach((plan) => {
-      keyboard.text(`${plan.name} - $${plan.price}`, selectPlan.pack({ planId: plan.id })).row();
+      keyboard
+        .text(
+          `${plan.name} - $${plan.price}`,
+          selectPlan.pack({ planId: plan.id })
+        )
+        .row();
     });
 
-    await ctx.editText("📊 Choose a VPN plan:", {
+    await ctx.editText("📊 vpn مورد نظر خود را انتخاب کنید:", {
       reply_markup: keyboard,
     });
   });
@@ -62,7 +71,7 @@ Amount: $${plan.price}
     const { planId } = session.waitingForReceipt;
     const plan = VPN_PLANS.find((p) => p.id === Number(planId));
     if (!plan) {
-      await ctx.send("Plan no longer available");
+      await ctx.send("این vpn درحال حاضر موجود نیست.");
       return;
     }
 
@@ -71,7 +80,7 @@ Amount: $${plan.price}
       : ctx.document?.fileId;
 
     if (!fileId) {
-      await ctx.reply("❌ Please send a valid image or document");
+      await ctx.reply("❌ لطفا یک تصویر یا سند معتبر ارسال کنید");
       return;
     }
 
@@ -95,23 +104,26 @@ Amount: $${plan.price}
       },
     });
 
-
-
     await bot.api.sendPhoto({
       chat_id: process.env.ADMIN_CHAT_ID!,
       photo: fileId,
-      caption: `⚠️ New Payment Review\n\n` +
-        `👤 User: ${ctx.from?.firstName || ""} (@${ctx.from?.username || "no-username"})\n` +
+      caption:
+        `⚠️ پرداختی جدید\n\n` +
+        `👤 کاربر: ${ctx.from?.firstName || ""} (@${
+          ctx.from?.username || "no-username"
+        })\n` +
         `🆔 ID: ${ctx.from?.id}\n` +
-        `📋 Plan: ${plan.name}\n` +
-        `📦 Traffic: ${plan.trafficGB}GB\n` +
-        `⏳ Duration: ${plan.duration} days\n` +
-        `💰 Amount: $${plan.price}\n` +
+        `📋 vpn: ${plan.name}\n` +
+        `📦 حجم: ${plan.trafficGB}GB\n` +
+        `⏳ مدت: ${plan.duration} روز\n` +
+        `💰 مبلغ: $${plan.price}\n` +
         `📝 Payment ID: ${payment.id}`,
       reply_markup: paymentAdminKeyboard(payment.id),
     });
 
     session.waitingForReceipt = undefined;
-    await ctx.reply("📨 Receipt received! We'll verify and activate your account shortly.");
+    await ctx.reply(
+      "📨 رسید شما دریافت شد ما در اسرع وقت ان را چک میکنیم و همینجا کانفیگ رو براتون ارسال میکنیم از صبر و شکیبایی شما مچکریم."
+    );
   });
 }
