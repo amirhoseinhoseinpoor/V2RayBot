@@ -1,15 +1,12 @@
 services:
   bot:
-    volumes:
-      - ./prisma:/usr/src/app/prisma
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm start"
     container_name: V2RayBot-bot
-    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile
+    command: npm start
+    volumes:
+      - .:/usr/src/app
     environment:
       - NODE_ENV=production
       - IS_DOCKER=true
@@ -17,8 +14,8 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=redis://redis:6379
     env_file:
-      - ./.env
-      - ./.env.production
+      - .env
+      - .env.production
     depends_on:
       postgres:
         condition: service_healthy
@@ -26,10 +23,11 @@ services:
         condition: service_healthy
     networks:
       - vpnbot-net
+    working_dir: /usr/src/app
 
   postgres:
     container_name: V2RayBot-postgres
-    image: postgres:15-alpine  
+    image: postgres:15-alpine
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -40,7 +38,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U V2RayBot -d V2RayBot"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-V2RayBot} -d ${DB_NAME:-V2RayBot}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -49,7 +47,7 @@ services:
 
   redis:
     container_name: V2RayBot-redis
-    image: redis:7-alpine  # Pinned version
+    image: redis:7-alpine
     command: ["redis-server", "--maxmemory-policy", "noeviction"]
     restart: unless-stopped
     volumes:

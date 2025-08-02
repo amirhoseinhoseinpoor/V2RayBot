@@ -9,8 +9,12 @@ RUN npm ci
 
 # Stage 3: Build
 FROM base AS builder
-COPY --from=deps /usr/src/app/node_modules ./node_modules
+# COPY --from=deps /usr/src/app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+RUN npm install -g npm@latest
+COPY prisma ./prisma
 COPY . .
+RUN npx prisma generate
 RUN npm run build && ls -la /usr/src/app/dist
 
 # Stage 4: Production image
