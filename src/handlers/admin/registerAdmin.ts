@@ -76,14 +76,13 @@ export function registerAdminHandlers(bot: Bot) {
 
       // Update admin UI
 
-      if (!ctx.message) {
-        throw new Error("Message context is missing!");
+      if (ctx.message) {
+        await bot.api.editMessageCaption({
+          chat_id: ctx.message.chat.id,
+          message_id: ctx.message?.id,
+          caption: `✅ تراکنش تایید شد #${paymentId}`,
+        });
       }
-      await bot.api.editMessageCaption({
-        chat_id: ctx.message.chat.id,
-        message_id: ctx.message?.id,
-        caption: `✅ تراکنش تایید شد #${paymentId}`,
-      });
       await ctx.answerCallbackQuery({ text: "VPN ایجاد شد و کاربر مطلع شد!" });
     } catch (error) {
       console.error("VPN creation failed:", error);
@@ -112,17 +111,14 @@ export function registerAdminHandlers(bot: Bot) {
         "لطفا دوباره ثبت سفارش کنید یا با پشتیبانی تماس بگیرید .",
     });
 
-    // Update admin UI
-    if (!ctx.message) {
-      throw new Error("Message context is missing!");
+    if (ctx.message) {
+      await bot.api.editMessageCaption({
+        chat_id: ctx.message.chat.id,
+        message_id: ctx.message?.id,
+
+        caption: `❌ Rejected Payment #${paymentId}`,
+      });
     }
-
-    await bot.api.editMessageCaption({
-      chat_id: ctx.message.chat.id,
-      message_id: ctx.message?.id,
-
-      caption: `❌ Rejected Payment #${paymentId}`,
-    });
     await ctx.answerCallbackQuery({ text: "کاربر مطلع شد. که دوباره بفرسته" });
   });
 }

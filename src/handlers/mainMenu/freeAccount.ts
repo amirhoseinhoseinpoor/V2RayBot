@@ -44,5 +44,5 @@ export async function handleFreeAccountRequest(ctx: any) {
     data: { freeAccount: true },
   });
 
-  return ctx.reply(`✅ حساب رایگان شما با موفقیت ایجاد شد:\n\n${config}`);
+  return ctx.reply(`✅ حساب رایگان شما با موفقیت ایجاد شد: ( بزنید روش کپی میشه خودش )\n\n<code>${config}</code>`);
 }
