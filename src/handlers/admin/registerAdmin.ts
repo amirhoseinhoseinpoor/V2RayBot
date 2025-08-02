@@ -34,13 +34,11 @@ export function registerAdminHandlers(bot: Bot) {
 
     try {
       // Generate V2Ray configuration
-      const v2rayConfig = await generateConfig(
-        {
-          telegramId : payment.user.telegramId,
-          accountType: "paid",
-          trafficLimit: payment.plan.trafficGB,
-        }
-      );
+      const v2rayConfig = await generateConfig({
+        telegramId: payment.user.telegramId,
+        accountType: "paid",
+        trafficLimit: payment.plan.trafficGB,
+      });
 
       // Create VPN record
       await prisma.vPN.create({
@@ -77,6 +75,10 @@ export function registerAdminHandlers(bot: Bot) {
       });
 
       // Update admin UI
+
+      if (!ctx.message) {
+        throw new Error("Message context is missing!");
+      }
       await bot.api.editMessageCaption({
         chat_id: ctx.message.chat.id,
         message_id: ctx.message?.id,
@@ -111,6 +113,10 @@ export function registerAdminHandlers(bot: Bot) {
     });
 
     // Update admin UI
+    if (!ctx.message) {
+      throw new Error("Message context is missing!");
+    }
+
     await bot.api.editMessageCaption({
       chat_id: ctx.message.chat.id,
       message_id: ctx.message?.id,
