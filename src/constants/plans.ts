@@ -15,5 +15,13 @@ export const VPN_PLANS = [
     trafficGB: 50,
     price: 150,
     description: "50GB اینترینت برای 30 روز"
+  },
+  {
+    id: 3,
+    name: "یک ماهه 75 گیگ",
+    duration: 30,
+    trafficGB: 75,
+    price: 210,
+    description: "75GB اینترینت برای 30 روز"
   }
 ];

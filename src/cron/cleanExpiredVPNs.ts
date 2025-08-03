@@ -17,7 +17,7 @@ export async function cleanExpiredVPNs() {
 
   for (const vpn of vpns) {
     const createdAt = vpn.createdAt;
-    const isFree = vpn.user?.freeAccount || false;
+    const isFree = vpn.user?.freeAccount || true; // Assume free account if not specified
 
     const expirationDate = isFree
       ? subDays(now, 1) // test accounts expire after 1 day
@@ -32,8 +32,6 @@ export async function cleanExpiredVPNs() {
 
   for (const vpn of expiredVPNS) {
     const deleted = await deleteV2RayUser({
-      id: vpn.uuid,
-      alterId: vpn.alterId ?? 0,
       email: vpn.email,
     });
 
@@ -51,7 +49,7 @@ export async function cleanExpiredVPNs() {
 
   if (successfulDeletions > 0) {
     await resetV2RayStats();
-    console.log("✅ Reset V2Ray stats after cleaning.");
+    console.log("✅ Reset V2Ray stats after cleaning user.");
   } else {
     console.log("📭 No expired VPNs successfully cleaned.");
   }

@@ -47,7 +47,6 @@ export function registerAdminHandlers(bot: Bot) {
           email: v2rayConfig.email,
           uuid: v2rayConfig.uuid,
           type: "paid",
-          expiresAt,
           trafficLimit,
           alterId: v2rayConfig.alterId,
         },

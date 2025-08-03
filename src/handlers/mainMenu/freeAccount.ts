@@ -1,10 +1,10 @@
 import { prisma } from "./../../db/index.js";
 import { generateConfig } from "../../services/configGenerate/generateConfig.js";
 import { MessageContext } from "gramio";
-import { type Bot } from "gramio";
+import { Bot } from "gramio";
 
-export async function handleFreeAccountRequest(ctx: any) {
-  const telegramId = ctx.from?.id.toString();
+export async function handleFreeAccountRequest(ctx: MessageContext<Bot>) {
+  const telegramId = ctx.from?.id;
   if (!telegramId) return ctx.reply("❌ Unable to get Telegram ID.");
 
   let user = await prisma.user.findUnique({ where: { telegramId } });
@@ -12,9 +12,9 @@ export async function handleFreeAccountRequest(ctx: any) {
   if (!user) {
     user = await prisma.user.create({
       data: {
-        telegramId,
+        telegramId: BigInt(telegramId),
         username: ctx.from?.username,
-        firstName: ctx.from?.first_name,
+        firstName: ctx.from?.firstName,
       },
     });
   }
@@ -24,7 +24,7 @@ export async function handleFreeAccountRequest(ctx: any) {
   }
 
   const { config, email, uuid, alterId } = await generateConfig({
-    telegramId: telegramId,
+    telegramId: BigInt(telegramId),
     accountType: "free",
     name: ctx.from?.username,
   });
@@ -44,5 +44,8 @@ export async function handleFreeAccountRequest(ctx: any) {
     data: { freeAccount: true },
   });
 
-  return ctx.reply(`✅ حساب رایگان شما با موفقیت ایجاد شد: ( بزنید روش کپی میشه خودش )\n\n<code>${config}</code>`);
+  return ctx.send(
+    `✅ حساب رایگان شما با موفقیت ایجاد شد: ( بزنید روش کپی میشه خودش )\n\n<code>${config}</code>`,
+    { parse_mode: "HTML" }
+  );
 }

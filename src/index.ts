@@ -1,6 +1,7 @@
 import { bot } from "./bot.js";
 import { config } from "./config.js";
 import { fastify } from "./webhook.js";
+import "./cron/node-cron.js";
 
 export async function startBot() {
   // Error handling first

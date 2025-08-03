@@ -1,5 +1,3 @@
-// cron/collectHourlyTraffic.ts
-
 import { prisma } from "../db/index.js";
 import { getUserTraffic, resetV2RayStats } from "../services/v2ray/v2rayApi.js";
 
@@ -9,38 +7,61 @@ export async function collectHourlyTraffic() {
     include: { user: true },
   });
 
+  const now = new Date();
+  const startOfHour = new Date(now);
+  startOfHour.setMinutes(0, 0, 0); // round to start of hour
+
   let collectedCount = 0;
 
   for (const vpn of vpns) {
     try {
       const stats = await getUserTraffic(vpn.email);
-
       if (!stats) {
-        console.warn(
-          `⚠️ Skipping traffic logging: VPN ${vpn.email} not found in V2Ray`
-        );
+        console.warn(`⚠️ Skipping: VPN ${vpn.email} not found in V2Ray`);
         continue;
       }
 
-      await prisma.traffic.create({
-        data: {
+      console.log(`🔢 [${vpn.email}] Uplink: ${stats.uplink}, Downlink: ${stats.downlink}`);
+
+      const existing = await prisma.traffic.findFirst({
+        where: {
           vpnId: vpn.id,
-          uplink: BigInt(stats.uplink),
-          downlink: BigInt(stats.downlink),
+          timestamp: {
+            gte: startOfHour,
+            lt: new Date(startOfHour.getTime() + 60 * 60 * 1000), // same hour window
+          },
         },
       });
+
+      if (existing) {
+        await prisma.traffic.update({
+          where: { id: existing.id },
+          data: {
+            uplink: existing.uplink + BigInt(Math.floor(stats.uplink)),
+            downlink: existing.downlink + BigInt(Math.floor(stats.downlink)),
+          },
+        });
+      } else {
+        await prisma.traffic.create({
+          data: {
+            vpnId: vpn.id,
+            uplink: BigInt(Math.floor(stats.uplink)),
+            downlink: BigInt(Math.floor(stats.downlink)),
+            timestamp: startOfHour,
+          },
+        });
+      }
+
       collectedCount++;
     } catch (err) {
-      console.error(`❌ Failed to collect traffic for ${vpn.email}:`, err);
+      console.error(`❌ Error collecting for ${vpn.email}:`, err);
     }
   }
 
   if (collectedCount > 0) {
     await resetV2RayStats();
-    console.log(
-      `✅ Collected traffic for ${collectedCount} VPNs and reset stats.`
-    );
+    console.log(`✅ Collected traffic for ${collectedCount} VPNs and reset stats.`);
   } else {
-    console.log("📭 No traffic collected this hour.");
+    console.log("📭 No traffic collected.");
   }
 }

@@ -4,10 +4,13 @@ import { collectHourlyTraffic } from "./collectHourlyTraffic.js";
 import { cleanExpiredVPNs } from "./cleanExpiredVPNs.js";
 import { cleanTrafficLimit } from "./cleanTrafficLimit.js";
 
+
 // hourly traffic collection cron job and reset stats
-cron.schedule("0 * * * *", async () => {
+cron.schedule("01 * * * *", async () => {
   console.log("⏰ Collecting hourly traffic...");
   await collectHourlyTraffic();
+}, {
+  timezone:"Asia/Tehran",
 });
 
 // hourly clean expired VPNs cron job
@@ -15,6 +18,8 @@ cron.schedule("0 * * * *", async () => {
 cron.schedule("10 * * * *", async () => {
   console.log("🧹 Cleaning expired VPNs...");
   await cleanExpiredVPNs();
+}, {
+  timezone:"Asia/Tehran",
 });
 
 // hourly clean traffic limit cron job
@@ -22,4 +27,6 @@ cron.schedule("10 * * * *", async () => {
 cron.schedule("20 * * * *", async () => {
   console.log("🧹 Cleaning traffic limits...");
   await cleanTrafficLimit();
+}, {
+  timezone:"Asia/Tehran",
 });

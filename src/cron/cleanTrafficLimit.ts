@@ -1,10 +1,8 @@
 import { prisma } from "../db/index.js";
-import { deleteV2RayUser, resetV2RayStats } from "../services/v2ray/v2rayApi.js";
-
-const TRAFFIC_LIMITS = {
-  free: 300n * 1024n * 1024n, // 300MB
-  paid: 25n * 1024n * 1024n * 1024n, // 25GB
-};
+import {
+  deleteV2RayUser,
+  resetV2RayStats,
+} from "../services/v2ray/v2rayApi.js";
 
 export async function cleanTrafficLimit() {
   const vpns = await prisma.vPN.findMany({
@@ -13,28 +11,45 @@ export async function cleanTrafficLimit() {
     },
     include: {
       trafficLogs: true,
+      plan: true,
     },
   });
 
   let cleanedCount = 0;
 
   for (const vpn of vpns) {
-    const limit = TRAFFIC_LIMITS[vpn.type];
+    let limit: bigint;
 
-    const totalUplink = vpn.trafficLogs.reduce((sum, log) => sum + log.uplink, 0n);
-    const totalDownlink = vpn.trafficLogs.reduce((sum, log) => sum + log.downlink, 0n);
+    if (vpn.type === "free") {
+      limit = 300n * 1024n * 1024n; // 300MB
+    } else if (vpn.type === "paid") {
+      const planTraffic = vpn.plan?.trafficGB ?? 25; // fallback if missing
+      limit = BigInt(planTraffic) * 1024n * 1024n * 1024n; // Convert GB to bytes
+    } else {
+      console.warn(`⚠️ Unknown VPN type: ${vpn.type}, skipping...`);
+      continue;
+    }
+
+    const totalUplink = vpn.trafficLogs.reduce(
+      (sum, log) => sum + log.uplink,
+      0n
+    );
+    const totalDownlink = vpn.trafficLogs.reduce(
+      (sum, log) => sum + log.downlink,
+      0n
+    );
     const totalTraffic = totalUplink + totalDownlink;
 
     if (totalTraffic > limit) {
       try {
         const trafficMB = Number(totalTraffic) / 1024 / 1024;
-        console.log(`🚫 VPN (${vpn.type}) ${vpn.email} exceeded limit: ${trafficMB.toFixed(2)} MB`);
+        console.log(
+          `🚫 VPN (${vpn.type}) ${
+            vpn.email
+          } exceeded limit: ${trafficMB.toFixed(2)} MB`
+        );
 
-        await deleteV2RayUser({
-          id: vpn.uuid,
-          alterId: vpn.alterId,
-          email: vpn.email,
-        });
+        await deleteV2RayUser({ email: vpn.email }); // updated API
 
         await prisma.vPN.update({
           where: { id: vpn.id },
