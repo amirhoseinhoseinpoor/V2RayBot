@@ -1,7 +1,6 @@
 import { prisma } from "../db/index.js";
 import {
   deleteV2RayUser,
-  resetV2RayStats,
 } from "../services/v2ray/v2rayApi.js";
 
 export async function cleanTrafficLimit() {
@@ -64,7 +63,6 @@ export async function cleanTrafficLimit() {
   }
 
   if (cleanedCount > 0) {
-    await resetV2RayStats();
     console.log(`✅ Cleaned ${cleanedCount} VPNs (over traffic limit)`);
   } else {
     console.log("📭 No VPNs exceeded their traffic limits.");

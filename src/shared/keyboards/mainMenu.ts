@@ -6,4 +6,5 @@ export const mainMenuKeyboard = new Keyboard()
   .text("🔎 اکانت رایگان")
   .row()
   .text("🛠 پشتیبانی")
+  .text("👨‍🏫 اموزش اتصال")
   .resized(); // makes it fit nicely

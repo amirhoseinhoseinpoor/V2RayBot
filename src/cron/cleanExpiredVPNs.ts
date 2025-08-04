@@ -1,7 +1,6 @@
 import { prisma } from "../db/index.js";
 import {
   deleteV2RayUser,
-  resetV2RayStats,
 } from "../services/v2ray/v2rayApi.js";
 import { subDays, isBefore } from "date-fns";
 
@@ -48,7 +47,6 @@ export async function cleanExpiredVPNs() {
   }
 
   if (successfulDeletions > 0) {
-    await resetV2RayStats();
     console.log("✅ Reset V2Ray stats after cleaning user.");
   } else {
     console.log("📭 No expired VPNs successfully cleaned.");

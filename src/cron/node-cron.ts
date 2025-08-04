@@ -3,6 +3,7 @@ import cron from "node-cron";
 import { collectHourlyTraffic } from "./collectHourlyTraffic.js";
 import { cleanExpiredVPNs } from "./cleanExpiredVPNs.js";
 import { cleanTrafficLimit } from "./cleanTrafficLimit.js";
+// import { backupDatabase } from "./backupDatabase.js";
 
 
 // hourly traffic collection cron job and reset stats
@@ -30,3 +31,11 @@ cron.schedule("20 * * * *", async () => {
 }, {
   timezone:"Asia/Tehran",
 });
+
+// daily backup at 3:00 AM Tehran time
+// cron.schedule("0 3 * * *", async () => {
+//   console.log("🗄️ Running daily database backup...");
+//   await backupDatabase();
+// }, {
+//   timezone: "Asia/Tehran",
+// });

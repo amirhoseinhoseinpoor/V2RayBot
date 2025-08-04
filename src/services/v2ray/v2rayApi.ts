@@ -61,7 +61,7 @@ export async function deleteV2RayUser({ email }: { email: string }): Promise<boo
       throw new Error("Failed to read V2Ray config: " + catResult.stderr);
     }
 
-    collectHourlyTraffic();
+    await collectHourlyTraffic();
 
     const config = JSON.parse(catResult.stdout);
 
