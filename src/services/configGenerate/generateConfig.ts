@@ -126,7 +126,7 @@ export async function generateConfig({
     const vmess: VMessConfig = {
       v: "2",
       ps: `${accountType === "paid" ? "PremiumAccount" : "FreeAccount"}`,
-      add: process.env.VPS_HOST!,
+      add: process.env.VPS_HOSTIRAN!,
       port: port,
       id: userObject.id,
       aid: userObject.alterId,

@@ -45,7 +45,7 @@ export async function handleFreeAccountRequest(ctx: MessageContext<Bot>) {
   });
 
   return ctx.send(
-    `✅ حساب رایگان شما با موفقیت ایجاد شد: ( بزنید روش کپی میشه خودش )\n\n<code>${config}</code>`,
+    `✅ حساب رایگان شما با موفقیت ایجاد شد: ( بزنید روش کپی میشه خودش )\n\n<code>${config}</code>\n\n ▫️یک روزه  \n ▫️300 مگابایت`,
     { parse_mode: "HTML" }
   );
 }

@@ -62,11 +62,12 @@ bot
 
   .onStart(({ info }) => console.log(`✨ Bot ${info.username} was started!`));
 
-bot.start().catch((err) => {
-  console.error("❌ Bot failed to start:", err);
-  process.exit(1);
-});
+// bot.start().catch((err) => {
+//   console.error("❌ Bot failed to start:", err);
+//   process.exit(1);
+// });
 
 registerMenuHandlers(bot);
 registerBuyServiceHandlers(bot);
 registerAdminHandlers(bot);
+

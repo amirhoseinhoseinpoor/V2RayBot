@@ -2,27 +2,33 @@
 FROM node:20-alpine AS base
 WORKDIR /usr/src/app
 
-# Stage 2: Install dependencies
+# Stage 2: Dependencies
 FROM base AS deps
 COPY package.json package-lock.json ./
 RUN npm ci
 
+
 # Stage 3: Build
 FROM base AS builder
-# COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY package.json package-lock.json ./
-RUN npm install -g npm@latest
-COPY prisma ./prisma
+COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
-RUN npm run build && ls -la /usr/src/app/dist
+RUN npm run build
 
 # Stage 4: Production image
 FROM base AS production
 ENV NODE_ENV=production
+RUN apk add --no-cache postgresql-client
+
+# Copy only what's needed
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
-COPY package.json .
+COPY --from=builder /usr/src/app/package.json ./
+COPY --from=builder /usr/src/app/prisma ./prisma
+COPY --from=builder /usr/src/app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /usr/src/app/node_modules/@prisma ./node_modules/@prisma
 
-# Fix entrypoint
+# ✅ This ensures the generated client exists
+RUN npx prisma generate
+
 CMD ["node", "dist/index.js"]

@@ -14,12 +14,14 @@ export async function startBot() {
   const signals = ["SIGINT", "SIGTERM"] as const;
   signals.forEach(signal => process.on(signal, gracefulShutdown));
 
+  await startPollingMode();
+
   // Start based on environment
-  if (config.NODE_ENV === "production") {
-    await startWebhookMode();
-  } else {
-    await startPollingMode();
-  }
+  // if (config.NODE_ENV === "production") {
+  //   await startWebhookMode();
+  // } else {
+  //   await startPollingMode();
+  // }
 }
 
 async function startWebhookMode() {
@@ -40,3 +42,5 @@ async function gracefulShutdown() {
   await bot.stop();
   process.exit(0);
 }
+
+startBot();

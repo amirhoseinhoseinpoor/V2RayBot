@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     command: npm start
     volumes:
-      - .:/usr/src/app
+      - ./db_backups:/usr/src/app/db_backups
     environment:
       - NODE_ENV=production
       - IS_DOCKER=true

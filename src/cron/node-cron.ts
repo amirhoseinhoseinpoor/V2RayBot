@@ -3,11 +3,11 @@ import cron from "node-cron";
 import { collectHourlyTraffic } from "./collectHourlyTraffic.js";
 import { cleanExpiredVPNs } from "./cleanExpiredVPNs.js";
 import { cleanTrafficLimit } from "./cleanTrafficLimit.js";
-// import { backupDatabase } from "./backupDatabase.js";
+import { backupDatabase } from "./backup.js";
 
 
 // hourly traffic collection cron job and reset stats
-cron.schedule("01 * * * *", async () => {
+cron.schedule("00 * * * *", async () => {
   console.log("⏰ Collecting hourly traffic...");
   await collectHourlyTraffic();
 }, {
@@ -33,9 +33,9 @@ cron.schedule("20 * * * *", async () => {
 });
 
 // daily backup at 3:00 AM Tehran time
-// cron.schedule("0 3 * * *", async () => {
-//   console.log("🗄️ Running daily database backup...");
-//   await backupDatabase();
-// }, {
-//   timezone: "Asia/Tehran",
-// });
+cron.schedule("00 3 * * *", async () => {
+  console.log("🗄️ Running daily database backup...");
+  await backupDatabase();
+}, {
+  timezone: "Asia/Tehran",
+});
