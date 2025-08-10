@@ -30,7 +30,6 @@ COPY --from=builder /usr/src/app/node_modules/@prisma ./node_modules/@prisma
 
 # ✅ This ensures the generated client exists
 RUN npx prisma generate
-RUN npx prisma migrate
-RUN npx prisma migrate deploy
+
 
 CMD ["node", "dist/index.js"]
