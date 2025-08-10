@@ -1,28 +1,35 @@
 import { prisma } from "../db/index.js";
-import {
-  deleteV2RayUser,
-} from "../services/v2ray/v2rayApi.js";
-import { subDays, isBefore } from "date-fns";
+import { deleteV2RayUser } from "../services/v2ray/v2rayApi.js";
+import { addDays, isBefore } from "date-fns";
 
 export async function cleanExpiredVPNs() {
   const now = new Date();
 
   // Fetch all VPNs and filter expired ones manually
   const vpns = await prisma.vPN.findMany({
-    include: { user: true },
+    where: { expired: false },
+    include: { user: true, plan: true },
   });
 
   const expiredVPNS: typeof vpns = [];
 
   for (const vpn of vpns) {
-    const createdAt = vpn.createdAt;
-    const isFree = vpn.user?.freeAccount || true; // Assume free account if not specified
 
-    const expirationDate = isFree
-      ? subDays(now, 1) // test accounts expire after 1 day
-      : subDays(now, 30); // normal accounts expire after 30 days
+     let expirationDate;
 
-    if (isBefore(createdAt, expirationDate)) {
+     
+    if (vpn.type === 'free') {
+      expirationDate = addDays(vpn.createdAt, 1);
+
+    } else if (vpn.plan && vpn.type === 'paid') {
+      // Paid account with plan: createdAt + plan.duration days
+      expirationDate = addDays(vpn.createdAt, vpn.plan.duration);
+    } else {
+      // Paid but no plan set → default to 30 days
+      expirationDate = addDays(vpn.createdAt, 30);
+    }
+
+    if (isBefore(expirationDate, now)) {
       expiredVPNS.push(vpn);
     }
   }
