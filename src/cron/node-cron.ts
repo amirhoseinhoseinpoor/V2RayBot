@@ -7,7 +7,7 @@ import { backupDatabase } from "./backup.js";
 
 
 // hourly traffic collection cron job and reset stats
-cron.schedule("20 * * * *", async () => {
+cron.schedule("00 * * * *", async () => {
   console.log("⏰ Collecting hourly traffic...");
   await collectHourlyTraffic();
 }, {
@@ -16,7 +16,7 @@ cron.schedule("20 * * * *", async () => {
 
 // hourly clean expired VPNs cron job
 // This will run every hour at the 10th minute
-cron.schedule("21 * * * *", async () => {
+cron.schedule("10 * * * *", async () => {
   console.log("🧹 Cleaning expired VPNs...");
   await cleanExpiredVPNs();
 }, {
@@ -25,7 +25,7 @@ cron.schedule("21 * * * *", async () => {
 
 // hourly clean traffic limit cron job
 // This will run every hour at the 20th minute
-cron.schedule("22 * * * *", async () => {
+cron.schedule("20 * * * *", async () => {
   console.log("🧹 Cleaning traffic limits...");
   await cleanTrafficLimit();
 }, {
