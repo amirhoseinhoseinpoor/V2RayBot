@@ -2,26 +2,66 @@
 export const VPN_PLANS = [
   {
     id: 1,
-    name: "یک ماهه 25 گیگ",
+    name: "یک ماهه 10 گیگ",
     duration: 30,
-    trafficGB: 25,
-    price: 80,
-    description: "25GB اینترینت برای 30 روز"
+    trafficGB: 10,
+    price: 38,
+    description: "10GB اینترینت برای 30 روز",
   },
   {
     id: 2,
-    name: "یک ماهه 50 گیگ",
+    name: "یک ماهه 25 گیگ",
     duration: 30,
-    trafficGB: 50,
-    price: 150,
-    description: "50GB اینترینت برای 30 روز"
+    trafficGB: 25,
+    price: 75,
+    description: "25GB اینترینت برای 30 روز",
   },
   {
     id: 3,
+    name: "یک ماهه 50 گیگ",
+    duration: 30,
+    trafficGB: 50,
+    price: 145,
+    description: "50GB اینترینت برای 30 روز",
+  },
+  {
+    id: 4,
     name: "یک ماهه 75 گیگ",
     duration: 30,
     trafficGB: 75,
+    price: 215,
+    description: "75GB اینترینت برای 30 روز",
+  },
+  {
+    id: 5,
+    name: "2 ماهه 25 گیگ",
+    duration: 60,
+    trafficGB: 25,
+    price: 110,
+    description: "25GB اینترینت برای 60 روز",
+  },
+  {
+    id: 6,
+    name: "2 ماهه 50 گیگ",
+    duration: 60,
+    trafficGB: 50,
     price: 210,
-    description: "75GB اینترینت برای 30 روز"
-  }
+    description: "50GB اینترینت برای 60 روز",
+  },
+  {
+    id: 7,
+    name: "3 ماهه 60 گیگ",
+    duration: 90,
+    trafficGB: 60,
+    price: 250,
+    description: "60GB اینترینت برای 90 روز",
+  },
+  {
+    id: 8,
+    name: "3 ماهه 100 گیگ",
+    duration: 90,
+    trafficGB: 100,
+    price: 350,
+    description: "100GB اینترینت برای 90 روز",
+  },
 ];

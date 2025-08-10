@@ -39,6 +39,7 @@
     "google-protobuf": "^3.21.4",
     "gramio": "^0.4.10",
     "ioredis": "^5.6.1",
+    "jalali-moment": "^3.3.11",
     "jobify": "^0.1.6",
     "node-cron": "^4.2.1",
     "node-ssh": "^13.2.1",

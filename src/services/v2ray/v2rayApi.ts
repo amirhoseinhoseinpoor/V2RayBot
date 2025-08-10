@@ -19,7 +19,7 @@ export async function getAllTrafficStats(): Promise<string> {
 
 export async function getUserTraffic(email: string): Promise<{ uplink: number; downlink: number }> {
   await connectSSH();
-  const command = `/usr/bin/v2ray api stats --server=127.0.0.1:${process.env.V2RAY_API_PORT} "user>>>${email}"`;
+  const command = `/usr/bin/v2ray api stats --server=127.0.0.1:${process.env.V2RAY_API_PORT} user\>\>\>${email}`;
 
   const result = await ssh.execCommand(command);
 

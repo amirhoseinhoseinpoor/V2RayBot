@@ -6,6 +6,7 @@ import {
   confirmPayment,
   rejectPayment,
 } from "../../shared/callback-data/buyVPN.js";
+import { toShamsi } from "../../utils/shamsiDate.js";
 
 export function registerAdminHandlers(bot: Bot) {
   // Confirm payment and create VPN
@@ -31,6 +32,7 @@ export function registerAdminHandlers(bot: Bot) {
 
     // Calculate expiration date
     const expiresAt = addDays(new Date(), payment.plan.duration);
+    const shamsiDate = toShamsi(expiresAt);
 
     try {
       // Generate V2Ray configuration
@@ -49,6 +51,9 @@ export function registerAdminHandlers(bot: Bot) {
           type: "paid",
           trafficLimit,
           alterId: v2rayConfig.alterId,
+          planId: payment.plan.id,
+          expiredAt: expiresAt,
+          expired: false
         },
       });
 
@@ -64,12 +69,12 @@ export function registerAdminHandlers(bot: Bot) {
         text:
           `🎉 تراکنش شما تایید شد ! اکانت پرمیوم شما:\n\n` +
           `🧩 کانفیگ شما (با کیلیک روش کپی میشه):\n\n<code>${v2rayConfig.config}</code>\n\n` +
-          `📦 Traffic: ${
+          `📦 حجم: ${
             payment.plan.trafficGB === 999
               ? "نامحدود"
               : `${payment.plan.trafficGB}GB`
           }\n` +
-          `⏳ تاریخ پایان: ${expiresAt.toLocaleDateString()}`,
+          `⏳ تاریخ پایان: ${shamsiDate}`,
         parse_mode: "HTML",
       });
 

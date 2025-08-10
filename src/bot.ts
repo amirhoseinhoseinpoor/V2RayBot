@@ -14,6 +14,7 @@ import { redis } from "./services/redis.js";
 import { registerMenuHandlers } from "./handlers/mainMenu/index.js";
 import { registerBuyServiceHandlers } from "./handlers/mainMenu/registerBuyService.js";
 import { registerAdminHandlers } from "./handlers/admin/registerAdmin.js";
+import { registerActiveServiceHandlers } from "./handlers/mainMenu/registerActiveService.js";
 // import keyboards
 import { mainMenuKeyboard } from "./shared/keyboards/mainMenu.js";
 // import services
@@ -70,4 +71,4 @@ bot
 registerMenuHandlers(bot);
 registerBuyServiceHandlers(bot);
 registerAdminHandlers(bot);
-
+registerActiveServiceHandlers(bot);

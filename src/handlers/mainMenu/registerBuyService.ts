@@ -53,13 +53,13 @@ vpn: ${plan.name}
     VPN_PLANS.forEach((plan) => {
       keyboard
         .text(
-          `${plan.name} - $${plan.price}`,
+          `${plan.name} - ${plan.price}T`,
           selectPlan.pack({ planId: plan.id })
         )
         .row();
     });
 
-    await ctx.editText("📊 vpn مورد نظر خود را انتخاب کنید:", {
+    await ctx.editText("📊 وی پی ان مورد نظر خود را انتخاب کنید:", {
       reply_markup: keyboard,
     });
   });

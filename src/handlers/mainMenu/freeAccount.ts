@@ -2,6 +2,7 @@ import { prisma } from "./../../db/index.js";
 import { generateConfig } from "../../services/configGenerate/generateConfig.js";
 import { MessageContext } from "gramio";
 import { Bot } from "gramio";
+import { addDays } from "date-fns";
 
 export async function handleFreeAccountRequest(ctx: MessageContext<Bot>) {
   const telegramId = ctx.from?.id;
@@ -29,13 +30,19 @@ export async function handleFreeAccountRequest(ctx: MessageContext<Bot>) {
     name: ctx.from?.username,
   });
 
+  const trafficLimit = 0.3 * 1024 * 1024 * 1024;
+
+  const expiresAt = addDays(new Date(), 1);
+
   await prisma.vPN.create({
     data: {
       email,
       uuid,
       alterId,
       userId: user.id,
-      type: "free", // mark it as free account
+      type: "free",
+      trafficLimit: trafficLimit,
+      expiredAt: expiresAt
     },
   });
 

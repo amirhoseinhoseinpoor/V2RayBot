@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -9,27 +9,25 @@ datasource db {
 }
 
 model User {
-  id          Int     @id @default(autoincrement())
-  telegramId  BigInt  @unique
-  username    String? // Optional, in case the user has no username
+  id          Int       @id @default(autoincrement())
+  telegramId  BigInt    @unique
+  username    String?
   firstName   String?
-  freeAccount Boolean @default(false)
-
-  vpns VPN[] // One-to-many
-
-  createdAt DateTime  @default(now())
-  Payment   Payment[]
+  freeAccount Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  Payment     Payment[]
+  vpns        VPN[]
 }
 
 model Plan {
   id          Int       @id @default(autoincrement())
   name        String
   description String
-  duration    Int // Duration in days
-  trafficGB   Int // Traffic limit in GB
+  duration    Int
+  trafficGB   Int
   price       Float
   Payment     Payment[]
-  vpns       VPN[]
+  vpns        VPN[]
 }
 
 model Payment {
@@ -37,37 +35,38 @@ model Payment {
   userId    Int
   planId    Int
   amount    Float
-  receipt   String // Telegram file_id of receipt
-  status    String // "pending", "confirmed", "rejected"
+  receipt   String
+  status    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
   plan      Plan     @relation(fields: [planId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model VPN {
   id           Int       @id @default(autoincrement())
   userId       Int
-  user         User      @relation(fields: [userId], references: [id])
-  planId       Int?      // <-- NEW: add planId (nullable for free accounts)
-  plan         Plan?     @relation(fields: [planId], references: [id]) 
-  email        String    @unique // v2ray email identifier
-  uuid         String // V2Ray user ID
+  email        String    @unique
+  uuid         String
   alterId      Int       @default(0)
   createdAt    DateTime  @default(now())
-  type         VPNType // 'free' or 'paid'
+  type         VPNType
   expired      Boolean   @default(false)
   trafficLimit BigInt    @default(0)
-  trafficLogs  Traffic[] // hourly traffic snapshots
+  planId       Int?
+  expiredAt    DateTime? @db.Timestamp(6)
+  trafficLogs  Traffic[]
+  plan         Plan?     @relation(fields: [planId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
 }
 
 model Traffic {
   id        Int      @id @default(autoincrement())
   vpnId     Int
-  vpn       VPN      @relation(fields: [vpnId], references: [id])
   uplink    BigInt   @default(0)
   downlink  BigInt   @default(0)
   timestamp DateTime @default(now())
+  vpn       VPN      @relation(fields: [vpnId], references: [id])
 }
 
 enum VPNType {
