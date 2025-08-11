@@ -21,36 +21,23 @@ export async function collectHourlyTraffic() {
         continue;
       }
 
-      console.log(`🔢 [${vpn.email}] Uplink: ${stats.uplink}, Downlink: ${stats.downlink}`);
+      console.log(
+        `🔢 [${vpn.email}] Uplink: ${stats.uplink}, Downlink: ${stats.downlink}`
+      );
 
-      const existing = await prisma.traffic.findFirst({
-        where: {
+      await prisma.traffic.upsert({
+        where: { vpnId_timestamp: { vpnId: vpn.id, timestamp: startOfHour } },
+        update: {
+          uplink: { increment: BigInt(Math.floor(stats.uplink)) },
+          downlink: { increment: BigInt(Math.floor(stats.downlink)) },
+        },
+        create: {
           vpnId: vpn.id,
-          timestamp: {
-            gte: startOfHour,
-            lt: new Date(startOfHour.getTime() + 60 * 60 * 1000), // same hour window
-          },
+          uplink: BigInt(Math.floor(stats.uplink)),
+          downlink: BigInt(Math.floor(stats.downlink)),
+          timestamp: startOfHour,
         },
       });
-
-      if (existing) {
-        await prisma.traffic.update({
-          where: { id: existing.id },
-          data: {
-            uplink: existing.uplink + BigInt(Math.floor(stats.uplink)),
-            downlink: existing.downlink + BigInt(Math.floor(stats.downlink)),
-          },
-        });
-      } else {
-        await prisma.traffic.create({
-          data: {
-            vpnId: vpn.id,
-            uplink: BigInt(Math.floor(stats.uplink)),
-            downlink: BigInt(Math.floor(stats.downlink)),
-            timestamp: startOfHour,
-          },
-        });
-      }
 
       collectedCount++;
     } catch (err) {
@@ -60,7 +47,9 @@ export async function collectHourlyTraffic() {
 
   if (collectedCount > 0) {
     await resetV2RayStats();
-    console.log(`✅ Collected traffic for ${collectedCount} VPNs and reset stats.`);
+    console.log(
+      `✅ Collected traffic for ${collectedCount} VPNs and reset stats.`
+    );
   } else {
     console.log("📭 No traffic collected.");
   }
