@@ -30,7 +30,7 @@ export async function handleFreeAccountRequest(ctx: MessageContext<Bot>) {
     name: ctx.from?.username,
   });
 
-  const trafficLimit = 0.3 * 1024 * 1024 * 1024;
+ const trafficLimit = BigInt(Math.floor(0.3 * 1024 * 1024 * 1024));
 
   const expiresAt = addDays(new Date(), 1);
 
