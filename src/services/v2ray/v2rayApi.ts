@@ -6,7 +6,7 @@ dotenv.config();
 export async function getAllTrafficStats(): Promise<string> {
   await connectSSH();
 
-  const cmd = `/usr/bin/v2ray api stats --server=127.0.0.1:32889`;
+  const cmd = `/usr/bin/v2ray api stats --server=127.0.0.1:10085`;
   const result = await ssh.execCommand(cmd);
 
   if (result.stderr) {
@@ -19,7 +19,7 @@ export async function getAllTrafficStats(): Promise<string> {
 
 export async function getUserTraffic(email: string): Promise<{ uplink: number; downlink: number }> {
   await connectSSH();
-  const command = `/usr/bin/v2ray api stats --server=127.0.0.1:${process.env.V2RAY_API_PORT} "user>>>${email}"`;
+  const command = `/usr/bin/v2ray api stats --server=127.0.0.1:10085 "user>>>${email}"`;
 
   const result = await ssh.execCommand(command);
 
@@ -32,7 +32,7 @@ export async function getUserTraffic(email: string): Promise<{ uplink: number; d
 
 export async function resetV2RayStats(): Promise<void> {
   await connectSSH();
-  const command = `/usr/bin/v2ray api stats --server=127.0.0.1:${process.env.V2RAY_API_PORT} --reset`;
+  const command = `/usr/bin/v2ray api stats --server=127.0.0.1:10085 --reset`;
 
   const result = await ssh.execCommand(command);
 
