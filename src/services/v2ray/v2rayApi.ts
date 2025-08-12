@@ -17,7 +17,9 @@ export async function getAllTrafficStats(): Promise<string> {
   return result.stdout;
 }
 
-export async function getUserTraffic(email: string): Promise<{ uplink: number; downlink: number }> {
+export async function getUserTraffic(
+  email: string
+): Promise<{ uplink: number; downlink: number }> {
   await connectSSH();
   const command = `/usr/bin/v2ray api stats --server=127.0.0.1:10085 "user>>>${email}"`;
 
@@ -44,7 +46,11 @@ export async function resetV2RayStats(): Promise<void> {
   console.log("✅ V2Ray stats reset successfully.");
 }
 
-export async function deleteV2RayUser({ email }: { email: string }): Promise<boolean> {
+export async function deleteV2RayUser({
+  email,
+}: {
+  email: string;
+}): Promise<boolean> {
   const configPath = "/usr/local/etc/v2ray/config.json";
   let tmpConfigPath = "";
 
@@ -60,8 +66,9 @@ export async function deleteV2RayUser({ email }: { email: string }): Promise<boo
     if (catResult.code !== 0 || !catResult.stdout) {
       throw new Error("Failed to read V2Ray config: " + catResult.stderr);
     }
-
-    await collectHourlyTraffic();
+    const now = new Date();
+    now.setMinutes(0, 0, 0);
+    await collectHourlyTraffic(now);
 
     const config = JSON.parse(catResult.stdout);
 
@@ -86,10 +93,14 @@ export async function deleteV2RayUser({ email }: { email: string }): Promise<boo
 
     // 4. Save updated config to temp file
     tmpConfigPath = `/tmp/v2ray-config-${Date.now()}.json`;
-    await ssh.execCommand(`echo '${JSON.stringify(config)}' > ${tmpConfigPath}`);
+    await ssh.execCommand(
+      `echo '${JSON.stringify(config)}' > ${tmpConfigPath}`
+    );
 
     // 5. Validate new config
-    const validation = await ssh.execCommand(`/usr/bin/v2ray test -config ${tmpConfigPath}`);
+    const validation = await ssh.execCommand(
+      `/usr/bin/v2ray test -config ${tmpConfigPath}`
+    );
     if (validation.code !== 0) {
       throw new Error(`❌ Config validation failed: ${validation.stderr}`);
     }
@@ -111,8 +122,6 @@ export async function deleteV2RayUser({ email }: { email: string }): Promise<boo
   }
 }
 
-
-
 // Helper parser
 function parseTraffic(output: string, type: "uplink" | "downlink"): number {
   const regex = new RegExp(`([\\d.]+)([KMG]?B)\\s+user.*traffic>>>${type}`);
@@ -125,10 +134,14 @@ function parseTraffic(output: string, type: "uplink" | "downlink"): number {
   const unit = match[2];
 
   switch (unit) {
-    case "KB": return value * 1024;
-    case "MB": return value * 1024 * 1024;
-    case "GB": return value * 1024 * 1024 * 1024;
-    default: return value;
+    case "KB":
+      return value * 1024;
+    case "MB":
+      return value * 1024 * 1024;
+    case "GB":
+      return value * 1024 * 1024 * 1024;
+    default:
+      return value;
   }
 }
 

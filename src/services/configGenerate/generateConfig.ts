@@ -32,7 +32,7 @@ export async function generateConfig({
   telegramId,
   accountType,
   trafficLimit,
-  name
+  name,
 }: {
   telegramId: bigint;
   accountType: "free" | "paid";
@@ -46,8 +46,13 @@ export async function generateConfig({
   name?: string;
 }> {
   const uuid = uuidv4();
-  const safeName = (name || "").replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 15);
-  const email = `${accountType || "free"}-${telegramId}-${safeName || ""}-${uuid.slice(0, 6)}@vpn.test`;
+  const safeName = (name || "")
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9_]/g, "")
+    .slice(0, 15);
+  const email = `${accountType || "free"}-${telegramId}-${
+    safeName || ""
+  }-${uuid.slice(0, 6)}@vpn.test`;
   const userObject: V2RayUser = {
     id: uuid,
     alterId: 0,
@@ -62,7 +67,9 @@ export async function generateConfig({
   let tmpConfigPath = "";
 
   try {
-    await collectHourlyTraffic();
+    const now = new Date();
+    now.setMinutes(0, 0, 0);
+    await collectHourlyTraffic(now);
     // Connect to server via SSH
     await ssh.connect({
       host: process.env.VPS_HOST!,
@@ -86,13 +93,12 @@ export async function generateConfig({
     if (inboundIndex === -1) throw new Error("VMess inbound not found");
 
     // 3. Add new user with traffic limit if paid
-        const clientConfig: any = {  
-            id: userObject.id,  
-            alterId: userObject.alterId,  
-            email: userObject.email,  
-            security: userObject.security,  
-        };  
-
+    const clientConfig: any = {
+      id: userObject.id,
+      alterId: userObject.alterId,
+      email: userObject.email,
+      security: userObject.security,
+    };
 
     if (accountType === "paid" && trafficLimit) {
       clientConfig.total = trafficLimit * 1024 * 1024 * 1024; // Convert GB to bytes
