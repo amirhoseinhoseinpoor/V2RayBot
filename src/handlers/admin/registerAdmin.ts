@@ -53,7 +53,7 @@ export function registerAdminHandlers(bot: Bot) {
           alterId: v2rayConfig.alterId,
           planId: payment.plan.id,
           expiredAt: expiresAt,
-          expired: false
+          expired: false,
         },
       });
 
@@ -78,15 +78,26 @@ export function registerAdminHandlers(bot: Bot) {
         parse_mode: "HTML",
       });
 
-      // Update admin UI
-
+      // Try to edit the admin message caption to show confirmation and remove buttons
       if (ctx.message) {
-        await bot.api.editMessageCaption({
-          chat_id: ctx.message.chat.id,
-          message_id: ctx.message?.id,
-          caption: `✅ تراکنش تایید شد #${paymentId}`,
-        });
+        const originalCaption = ctx.message.caption || "";
+        try {
+          await bot.api.editMessageCaption({
+            chat_id: ctx.message.chat.id,
+            message_id: ctx.message.id,
+            caption: `${originalCaption}\n\n✅ تراکنش تایید شد #${paymentId}`,
+            parse_mode: "Markdown",
+            reply_markup: undefined,
+          });
+        } catch (error) {
+          // If editing fails (e.g. message too old), send a new message instead
+          await bot.api.sendMessage({
+            chat_id: ctx.message.chat.id,
+            text: `✅ تراکنش تایید شد #${paymentId} (نمیتوان پیام قبلی را ویرایش کرد)`,
+          });
+        }
       }
+
       await ctx.answerCallbackQuery({ text: "VPN ایجاد شد و کاربر مطلع شد!" });
     } catch (error) {
       console.error("VPN creation failed:", error);
@@ -104,7 +115,7 @@ export function registerAdminHandlers(bot: Bot) {
       include: { user: true },
     });
 
-    // Notify user
+    // Notify user about rejection
     await bot.api.sendMessage({
       chat_id: payment.user.telegramId.toString(),
       text:
@@ -115,14 +126,26 @@ export function registerAdminHandlers(bot: Bot) {
         "لطفا دوباره ثبت سفارش کنید یا با پشتیبانی تماس بگیرید .",
     });
 
+    // Try to edit the admin message caption to show rejection and remove buttons
     if (ctx.message) {
-      await bot.api.editMessageCaption({
-        chat_id: ctx.message.chat.id,
-        message_id: ctx.message?.id,
-
-        caption: `❌ Rejected Payment #${paymentId}`,
-      });
+      const originalCaption = ctx.message.caption || "";
+      try {
+        await bot.api.editMessageCaption({
+          chat_id: ctx.message.chat.id,
+          message_id: ctx.message.id,
+          caption: `${originalCaption}\n\n❌ تراکنش رد شد #${paymentId}`,
+          parse_mode: "Markdown",
+          reply_markup: undefined,
+        });
+      } catch (error) {
+        // If editing fails (e.g. message too old), send a new message instead
+        await bot.api.sendMessage({
+          chat_id: ctx.message.chat.id,
+          text: `❌ تراکنش رد شد #${paymentId} (نمیتوان پیام قبلی را ویرایش کرد)`,
+        });
+      }
     }
-    await ctx.answerCallbackQuery({ text: "کاربر مطلع شد. که دوباره بفرسته" });
+
+    await ctx.answerCallbackQuery({ text: "کاربر مطلع شد که دوباره بفرسته" });
   });
 }
