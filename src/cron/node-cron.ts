@@ -11,9 +11,7 @@ cron.schedule(
   "10 * * * *",
   async () => {
     console.log("⏰ Collecting hourly traffic...");
-    const now = new Date();
-    now.setMinutes(0, 0, 0);
-    await collectHourlyTraffic(now);
+    await collectHourlyTraffic();
   },
   {
     timezone: "Asia/Tehran",

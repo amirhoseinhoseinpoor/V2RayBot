@@ -68,8 +68,8 @@ export async function generateConfig({
 
   try {
     const now = new Date();
-    now.setMinutes(0, 0, 0);
-    await collectHourlyTraffic(now);
+    const start = new Date(Math.floor(now.getTime() / 3600000) * 3600000);
+    await collectHourlyTraffic(start);
     // Connect to server via SSH
     await ssh.connect({
       host: process.env.VPS_HOST!,
