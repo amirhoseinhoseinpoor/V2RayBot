@@ -66,9 +66,7 @@ export async function deleteV2RayUser({
     if (catResult.code !== 0 || !catResult.stdout) {
       throw new Error("Failed to read V2Ray config: " + catResult.stderr);
     }
-    const now = new Date();
-    const start = new Date(Math.floor(now.getTime() / 3600000) * 3600000);
-    await collectHourlyTraffic(start);
+    await collectHourlyTraffic();
 
     const config = JSON.parse(catResult.stdout);
 

@@ -4,31 +4,21 @@ import { v4 as uuidv4 } from "uuid";
 import { prisma } from "../db/index.js";
 import { getUserTraffic, resetV2RayStats } from "../services/v2ray/v2rayApi.js";
 
-/**
- * Returns a canonical Date rounded down to the start of the hour (ms precision).
- * This uses epoch math so it's deterministic across machines/timezones.
- */
-function getStartOfHour(date = new Date()): Date {
-  const ms = Math.floor(date.getTime() / (60 * 60 * 1000)) * 60 * 60 * 1000;
-  return new Date(ms);
-}
-
 const redis = new (Redis as any)(process.env.REDIS_URL);
 const LOCK_KEY = "collectHourlyTraffic:lock";
 const LOCK_TTL_MS = 5 * 60 * 1000; // 5 minutes (adjust if your run can take longer)
 
-export async function collectHourlyTraffic(forcedDate?: Date) {
+export async function collectHourlyTraffic() {
   // Try to acquire distributed lock
   const token = uuidv4();
   const got = await redis.set(LOCK_KEY, token, "NX", "PX", LOCK_TTL_MS);
 
   if (!got) {
-    console.log("⏳ collectHourlyTraffic: another instance is running — skipping this run.");
+    console.log(
+      "⏳ collectHourlyTraffic: another instance is running — skipping this run."
+    );
     return;
   }
-
-  // compute canonical startOfHour (either from forcedDate or now)
-  const startOfHour = getStartOfHour(forcedDate ?? new Date());
 
   try {
     const vpns = await prisma.vPN.findMany({
@@ -46,20 +36,23 @@ export async function collectHourlyTraffic(forcedDate?: Date) {
           continue;
         }
 
-        console.log(`🔢 [${vpn.email}] Uplink: ${stats.uplink}, Downlink: ${stats.downlink}`);
+        console.log(
+          `🔢 [${vpn.email}] Uplink: ${stats.uplink}, Downlink: ${stats.downlink}`
+        );
 
         // Upsert using the canonical startOfHour — this prevents duplicates
         await prisma.traffic.upsert({
-          where: { vpnId_timestamp: { vpnId: vpn.id, timestamp: startOfHour } },
+          where: { vpnId: vpn.id },
           update: {
             uplink: { increment: BigInt(Math.floor(stats.uplink)) },
             downlink: { increment: BigInt(Math.floor(stats.downlink)) },
+            timestamp: new Date(), // last updated time
           },
           create: {
             vpnId: vpn.id,
             uplink: BigInt(Math.floor(stats.uplink)),
             downlink: BigInt(Math.floor(stats.downlink)),
-            timestamp: startOfHour,
+            timestamp: new Date(),
           },
         });
 
@@ -72,7 +65,9 @@ export async function collectHourlyTraffic(forcedDate?: Date) {
     if (collectedCount > 0) {
       try {
         await resetV2RayStats();
-        console.log(`✅ Collected traffic for ${collectedCount} VPNs and reset stats.`);
+        console.log(
+          `✅ Collected traffic for ${collectedCount} VPNs and reset stats.`
+        );
       } catch (err) {
         console.error("❌ Failed to reset V2Ray stats (non-fatal):", err);
       }
@@ -87,7 +82,10 @@ export async function collectHourlyTraffic(forcedDate?: Date) {
         await redis.del(LOCK_KEY);
       }
     } catch (releaseErr) {
-      console.error("⚠️ Error releasing collectHourlyTraffic lock:", releaseErr);
+      console.error(
+        "⚠️ Error releasing collectHourlyTraffic lock:",
+        releaseErr
+      );
     }
   }
 }

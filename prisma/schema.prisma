@@ -62,12 +62,11 @@ model VPN {
 
 model Traffic {
   id        Int      @id @default(autoincrement())
-  vpnId     Int
+  vpnId     Int      @unique
   uplink    BigInt   @default(0)
   downlink  BigInt   @default(0)
   timestamp DateTime @default(now())
   vpn       VPN      @relation(fields: [vpnId], references: [id])
-  @@unique([vpnId, timestamp])
 }
 
 enum VPNType {
