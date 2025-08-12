@@ -7,6 +7,7 @@ import { addDays } from "date-fns";
 export async function handleFreeAccountRequest(ctx: MessageContext<Bot>) {
   const telegramId = ctx.from?.id;
   if (!telegramId) return ctx.reply("❌ Unable to get Telegram ID.");
+  
 
   let user = await prisma.user.findUnique({ where: { telegramId } });
 
