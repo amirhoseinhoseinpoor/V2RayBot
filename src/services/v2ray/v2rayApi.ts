@@ -143,7 +143,45 @@ function parseTraffic(output: string, type: "uplink" | "downlink"): number {
   }
 }
 
-// // A simple parser if v2ray outputs plain byte value
-// function parseTraffic(output: string): number {
-//   return parseInt(output.trim());
-// }
+export function parseAllUserTraffic(output: string): Record<string, { uplink: number; downlink: number }> {
+  const lines = output.split("\n");
+  const trafficMap: Record<string, { uplink: number; downlink: number }> = {};
+
+  for (const line of lines) {
+    // Example line:
+    // 5   36.93MB     user>>>free-135936935-Benyamin_alipoo-0f24e9@vpn.test>>>traffic>>>downlink
+    const match = line.match(/^\s*\d+\s+([\d.]+)([KMG]?B|B)\s+user>>>([^>]+)>>>traffic>>>(uplink|downlink)/);
+
+    if (!match) continue;
+
+    const value = parseFloat(match[1]!);
+    const unit = match[2];
+    const email = match[3];
+    if (!email) continue;
+    const type = match[4] as "uplink" | "downlink";
+
+    let bytes = value;
+    switch (unit) {
+      case "B":
+        bytes = value;
+        break;
+      case "KB":
+        bytes = value * 1024;
+        break;
+      case "MB":
+        bytes = value * 1024 * 1024;
+        break;
+      case "GB":
+        bytes = value * 1024 * 1024 * 1024;
+        break;
+    }
+
+    if (!trafficMap[email]) {
+      trafficMap[email] = { uplink: 0, downlink: 0 };
+    }
+
+    trafficMap[email][type] += bytes;
+  }
+
+  return trafficMap;
+}

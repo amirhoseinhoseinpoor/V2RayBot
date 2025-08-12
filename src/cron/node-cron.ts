@@ -8,7 +8,7 @@ import { deleteExpiredVpnTraffic } from "./deleteExpiredVpnTraffic.js";
 
 // hourly traffic collection cron job and reset stats
 cron.schedule(
-  "10 * * * *",
+  "45 * * * *",
   async () => {
     console.log("⏰ Collecting hourly traffic...");
     await collectHourlyTraffic();
