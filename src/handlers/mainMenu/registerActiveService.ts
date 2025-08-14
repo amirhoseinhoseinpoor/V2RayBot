@@ -5,9 +5,10 @@ import { toShamsi } from "../../utils/shamsiDate.js";
 import { regenerateConfig } from "../../services/configGenerate/RegenerateConfig.js";
 
 // 📋 Function to list all active VPNs for the user
-async function showAllVPNs(ctx: any) {
+async function showUserVPNs(ctx: any, userId: number) {
   const vpns = await prisma.vPN.findMany({
     where : {
+      userId,
       expired: false,
     },
     include: { plan: true },
@@ -21,7 +22,7 @@ async function showAllVPNs(ctx: any) {
   vpns.forEach(vpn => {
     keyboard.text(
       `${vpn.email} (${vpn.plan?.name || "بدون پلن"})`,
-      `show_vpn_${vpn.id}`
+        `show_vpn_${vpn.id}`
     ).row();
   });
 
@@ -31,7 +32,21 @@ async function showAllVPNs(ctx: any) {
 export function registerActiveServiceHandlers(bot: Bot) {
   // Step 1: User requests active services
   bot.callbackQuery("active_services", async (ctx) => {
-    await showAllVPNs(ctx);
+    const telegramId = ctx.from?.id;
+
+      if (!telegramId) {
+      return ctx.send("❌ Unable to get Telegram ID.");
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { telegramId: BigInt(telegramId) },
+    });
+
+    if (!user) {
+      return ctx.send("❌ شما هیچ سرویس فعالی ندارید.");
+    }
+
+    await showUserVPNs(ctx, user.id);
   });
 
   // Step 2: Show specific VPN details
