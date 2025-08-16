@@ -15,8 +15,13 @@ import { registerMenuHandlers } from "./handlers/mainMenu/index.js";
 import { registerBuyServiceHandlers } from "./handlers/mainMenu/registerBuyService.js";
 import { registerAdminHandlers } from "./handlers/admin/registerAdmin.js";
 import { registerActiveServiceHandlers } from "./handlers/mainMenu/registerActiveService.js";
+import { sendChatToUserHandler } from "./handlers/admin/sendChatToUser.js";
+// bot message
+import { handleAdminMessage } from "./handlers/admin/sendChatToUser.js";
+import { handleBuyReceiptMessage } from "./handlers/mainMenu/registerBuyService.js";
 // import keyboards
 import { mainMenuKeyboard } from "./shared/keyboards/mainMenu.js";
+import { adminMenuKeyboard } from "./shared/keyboards/adminMenu.js";
 // import services
 import { findOrCreateUser } from "./services/mainServices/user.js";
 
@@ -53,22 +58,38 @@ bot
 
     const name = ctx.from?.firstName || "کاربر";
 
+    const keyboard =
+      tgUser.id === parseInt(process.env.ADMIN_CHAT_ID!)
+        ? adminMenuKeyboard
+        : mainMenuKeyboard;
+
     return ctx.send(
       `🎉 سلام کاربر ${name} به ربات خوش آمدید\n \n ▫️ارائه کانفیگ های اختصاصی پرسرعت با پشتیبانی\n \n ▫️قابل استفاده بر روی چند دستگاه هم زمان\n\n ▫️قابل استفاده بر روی : \n\n ▫️اندروید\n ▫️ایفون\n ▫️ویندوز\n\n\n 📣کانال اطلاعیه : @VIPV2RayNG_config \n\n 👤 پشتیبانی تمام وقت : @VIPV2RayNG_config_S \n\n\n`,
       {
-        reply_markup: mainMenuKeyboard,
+        reply_markup: keyboard,
       }
     );
   })
 
   .onStart(({ info }) => console.log(`✨ Bot ${info.username} was started!`));
 
+registerMenuHandlers(bot);
+registerBuyServiceHandlers(bot);
+registerAdminHandlers(bot);
+sendChatToUserHandler(bot);
+registerActiveServiceHandlers(bot);
+
+bot.on("message", async (ctx) => {
+  const handledBuy = await handleBuyReceiptMessage(ctx, bot);
+  if (handledBuy) return;
+
+  const handledByAdmin = await handleAdminMessage(ctx, bot);
+  if (handledByAdmin) return;
+
+  await ctx.send("❗ پیام شما پردازش نشد.");
+});
+
 // bot.start().catch((err) => {
 //   console.error("❌ Bot failed to start:", err);
 //   process.exit(1);
 // });
-
-registerMenuHandlers(bot);
-registerBuyServiceHandlers(bot);
-registerAdminHandlers(bot);
-registerActiveServiceHandlers(bot);

@@ -1,5 +1,5 @@
 // registerBuyServiceHandlers.ts
-import { Bot, InlineKeyboard } from "gramio";
+import { Bot, InlineKeyboard, ContextType } from "gramio";
 import { VPN_PLANS } from "../../constants/plans.js";
 import {
   buyVPN,
@@ -14,7 +14,7 @@ export function registerBuyServiceHandlers(bot: Bot) {
   bot.callbackQuery(selectPlan, async (ctx) => {
     const plan = VPN_PLANS.find((p) => p.id === ctx.queryData.planId);
     if (!plan) {
-      await ctx.answerCallbackQuery({ text: "Invalid plan selection" });
+      await ctx.answerCallbackQuery({ text: "این vpn درحال حاضر موجود نیست." });
       return;
     }
 
@@ -64,66 +64,133 @@ vpn: ${plan.name}
     });
   });
 
-  bot.on("message", async (ctx) => {
-    const session = getSession(ctx);
-    if (!session.waitingForReceipt) return;
+  // bot.on("message", async (ctx) => {
+  //   const session = getSession(ctx);
+  //   if (!session.waitingForReceipt) return;
 
-    const { planId } = session.waitingForReceipt;
-    const plan = VPN_PLANS.find((p) => p.id === Number(planId));
-    if (!plan) {
-      await ctx.send("این vpn درحال حاضر موجود نیست.");
-      return;
-    }
+  //   const { planId } = session.waitingForReceipt;
+  //   const plan = VPN_PLANS.find((p) => p.id === Number(planId));
+  //   if (!plan) {
+  //     await ctx.send("این vpn درحال حاضر موجود نیست.");
+  //     return;
+  //   }
 
-    const fileId = ctx.photo
-      ? ctx.photo[ctx.photo.length - 1]?.fileId
-      : ctx.document?.fileId;
+  //   const fileId = ctx.photo
+  //     ? ctx.photo[ctx.photo.length - 1]?.fileId
+  //     : ctx.document?.fileId;
 
-    if (!fileId) {
-      await ctx.reply("❌ لطفا یک تصویر یا سند معتبر ارسال کنید");
-      return;
-    }
+  //   if (!fileId) {
+  //     await ctx.reply("❌ لطفا یک تصویر یا سند معتبر ارسال کنید");
+  //     return;
+  //   }
 
-    const user = await prisma.user.upsert({
-      where: { telegramId: ctx.from?.id },
-      create: {
-        telegramId: ctx.from?.id || BigInt(0),
-        firstName: ctx.from?.firstName || "",
-        username: ctx.from?.username || "",
-      },
-      update: {},
-    });
+  //   const user = await prisma.user.upsert({
+  //     where: { telegramId: ctx.from?.id },
+  //     create: {
+  //       telegramId: ctx.from?.id || BigInt(0),
+  //       firstName: ctx.from?.firstName || "",
+  //       username: ctx.from?.username || "",
+  //     },
+  //     update: {},
+  //   });
 
-    const payment = await prisma.payment.create({
-      data: {
-        userId: user.id,
-        planId: plan.id,
-        amount: plan.price,
-        receipt: fileId,
-        status: "pending",
-      },
-    });
+  //   const payment = await prisma.payment.create({
+  //     data: {
+  //       userId: user.id,
+  //       planId: plan.id,
+  //       amount: plan.price,
+  //       receipt: fileId,
+  //       status: "pending",
+  //     },
+  //   });
 
-    await bot.api.sendPhoto({
-      chat_id: process.env.ADMIN_CHAT_ID!,
-      photo: fileId,
-      caption:
-        `⚠️ پرداختی جدید\n\n` +
-        `👤 کاربر: ${ctx.from?.firstName || ""} (@${
-          ctx.from?.username || "no-username"
-        })\n` +
-        `🆔 ID: ${ctx.from?.id}\n` +
-        `📋 vpn: ${plan.name}\n` +
-        `📦 حجم: ${plan.trafficGB}GB\n` +
-        `⏳ مدت: ${plan.duration} روز\n` +
-        `💰 مبلغ: ${plan.price}T\n` +
-        `📝 Payment ID: ${payment.id}`,
-      reply_markup: paymentAdminKeyboard(payment.id),
-    });
+  //   await bot.api.sendPhoto({
+  //     chat_id: process.env.ADMIN_CHAT_ID!,
+  //     photo: fileId,
+  //     caption:
+  //       `⚠️ پرداختی جدید\n\n` +
+  //       `👤 کاربر: ${ctx.from?.firstName || ""} (@${
+  //         ctx.from?.username || "no-username"
+  //       })\n` +
+  //       `🆔 ID: ${ctx.from?.id}\n` +
+  //       `📋 vpn: ${plan.name}\n` +
+  //       `📦 حجم: ${plan.trafficGB}GB\n` +
+  //       `⏳ مدت: ${plan.duration} روز\n` +
+  //       `💰 مبلغ: ${plan.price}T\n` +
+  //       `📝 Payment ID: ${payment.id}`,
+  //     reply_markup: paymentAdminKeyboard(payment.id),
+  //   });
 
-    session.waitingForReceipt = undefined;
-    await ctx.reply(
-      "📨 رسید شما دریافت شد ما در اسرع وقت ان را چک میکنیم و همینجا کانفیگ رو براتون ارسال میکنیم از صبر و شکیبایی شما مچکریم."
-    );
+  //   session.waitingForReceipt = undefined;
+  //   await ctx.reply(
+  //     "📨 رسید شما دریافت شد ما در اسرع وقت ان را چک میکنیم و همینجا کانفیگ رو براتون ارسال میکنیم از صبر و شکیبایی شما مچکریم."
+  //   );
+  // });
+}
+
+export async function handleBuyReceiptMessage(
+  ctx: ContextType<Bot, "message">,
+  bot: Bot
+): Promise<boolean> {
+  const session = getSession(ctx);
+  if (!session.waitingForReceipt) return false;
+
+  const { planId } = session.waitingForReceipt;
+  const plan = VPN_PLANS.find((p) => p.id === Number(planId));
+  if (!plan) {
+    await ctx.send("❌ این vpn درحال حاضر موجود نیست.");
+    return true;
+  }
+
+  const fileId = ctx.photo
+    ? ctx.photo[ctx.photo.length - 1]?.fileId
+    : ctx.document?.fileId;
+
+  if (!fileId) {
+    await ctx.send("❌ لطفا یک تصویر یا سند معتبر ارسال کنید.");
+    return true;
+  }
+
+  const user = await prisma.user.upsert({
+    where: { telegramId: ctx.from?.id },
+    create: {
+      telegramId: ctx.from?.id || BigInt(0),
+      firstName: ctx.from?.firstName || "",
+      username: ctx.from?.username || "",
+    },
+    update: {},
   });
+
+  const payment = await prisma.payment.create({
+    data: {
+      userId: user.id,
+      planId: plan.id,
+      amount: plan.price,
+      receipt: fileId,
+      status: "pending",
+    },
+  });
+
+  await bot.api.sendPhoto({
+    chat_id: process.env.ADMIN_CHAT_ID!,
+    photo: fileId,
+    caption:
+      `⚠️ پرداختی جدید\n\n` +
+      `👤 کاربر: ${ctx.from?.firstName || ""} (@${
+        ctx.from?.username || "no-username"
+      })\n` +
+      `🆔 ID: ${ctx.from?.id}\n` +
+      `📋 vpn: ${plan.name}\n` +
+      `📦 حجم: ${plan.trafficGB}GB\n` +
+      `⏳ مدت: ${plan.duration} روز\n` +
+      `💰 مبلغ: ${plan.price}T\n` +
+      `📝 Payment ID: ${payment.id}`,
+    reply_markup: paymentAdminKeyboard(payment.id),
+  });
+
+  session.waitingForReceipt = undefined;
+  await ctx.send(
+    "📨 رسید شما دریافت شد ما در اسرع وقت ان را چک میکنیم و همینجا کانفیگ رو براتون ارسال میکنیم از صبر و شکیبایی شما مچکریم."
+  );
+  return true;
 }
