@@ -5,6 +5,7 @@ import { cleanTrafficLimit } from "./cleanTrafficLimit.js";
 import { backupDatabase } from "./backup.js";
 import { syncV2RayWithDB } from "./syncV2RayWithDB.js";
 import { deleteExpiredVpnTraffic } from "./deleteExpiredVpnTraffic.js";
+import { sendHoldOverMessage } from "./sendHoldOverMessage.js";
 
 // hourly traffic collection cron job and reset stats
 cron.schedule(
@@ -73,6 +74,17 @@ cron.schedule(
   async () => {
     console.log("🗑 Running daily delete expired");
     await deleteExpiredVpnTraffic();
+  },
+  {
+    timezone: "Asia/Tehran",
+  }
+);
+
+cron.schedule(
+  "02 * * * *",
+  async () => {
+    console.log("🗑 Running 6houre holdover message");
+    await sendHoldOverMessage();
   },
   {
     timezone: "Asia/Tehran",

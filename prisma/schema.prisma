@@ -44,20 +44,22 @@ model Payment {
 }
 
 model VPN {
-  id           Int       @id @default(autoincrement())
-  userId       Int
-  email        String    @unique
-  uuid         String
-  alterId      Int       @default(0)
-  createdAt    DateTime  @default(now())
-  type         VPNType
-  expired      Boolean   @default(false)
-  trafficLimit BigInt    @default(0)
-  planId       Int?
-  expiredAt    DateTime? @db.Timestamp(6)
-  trafficLogs  Traffic[]
-  plan         Plan?     @relation(fields: [planId], references: [id])
-  user         User      @relation(fields: [userId], references: [id])
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  email         String    @unique
+  uuid          String
+  trafficNotify Boolean   @default(false)
+  timeNotify    Boolean   @default(false)
+  alterId       Int       @default(0)
+  createdAt     DateTime  @default(now())
+  type          VPNType
+  expired       Boolean   @default(false)
+  trafficLimit  BigInt    @default(0)
+  planId        Int?
+  expiredAt     DateTime? @db.Timestamp(6)
+  trafficLogs   Traffic[]
+  plan          Plan?     @relation(fields: [planId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
 }
 
 model Traffic {
