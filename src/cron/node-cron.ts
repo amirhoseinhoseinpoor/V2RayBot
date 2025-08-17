@@ -81,7 +81,7 @@ cron.schedule(
 );
 
 cron.schedule(
-  "02 * * * *",
+  "0 */6 * * *",
   async () => {
     console.log("🗑 Running 6houre holdover message");
     await sendHoldOverMessage();
