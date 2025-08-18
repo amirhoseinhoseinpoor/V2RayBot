@@ -55,6 +55,8 @@ model VPN {
   type          VPNType
   expired       Boolean   @default(false)
   trafficLimit  BigInt    @default(0)
+  savedDays     Int       @default(0)
+  savedTraffic  BigInt    @default(0)
   planId        Int?
   expiredAt     DateTime? @db.Timestamp(6)
   trafficLogs   Traffic[]

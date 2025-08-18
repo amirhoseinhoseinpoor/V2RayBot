@@ -2,6 +2,8 @@ interface SessionData {
     apple: number;
     waitingForReceipt?: {
         planId: string;
+        holdOver: boolean;
+        vpnId : number;
         startedAt: number;
     };
 }

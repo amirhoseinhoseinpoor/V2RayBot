@@ -6,18 +6,18 @@ export const mainMenuKeyboard = new Keyboard()
   .text("🔎 اکانت رایگان")
   .row()
   .text("📡 سرویس های فعال من")
-  .text("👨‍🏫 اموزش اتصال")
+  .text("⏰ تمدید اشتراک")
   .row()
   .text("🛠 پشتیبانی")
-  .resized(); // makes it fit nicely
+  .text("👨‍🏫 اموزش اتصال")
+  .resized();
 
-
-
-  export const mainMenuKeyboardNoFree = new Keyboard()
+export const mainMenuKeyboardNoFree = new Keyboard()
   .text("📦 خرید سرویس")
   .row()
   .text("📡 سرویس های فعال من")
-  .text("👨‍🏫 اموزش اتصال")
+  .text("⏰ تمدید اشتراک")
   .row()
   .text("🛠 پشتیبانی")
+  .text("👨‍🏫 اموزش اتصال")
   .resized();

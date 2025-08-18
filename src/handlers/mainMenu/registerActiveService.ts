@@ -3,11 +3,12 @@ import { prisma } from "../../db/index.js";
 import { Bot } from "gramio";
 import { toShamsi } from "../../utils/shamsiDate.js";
 import { regenerateConfig } from "../../services/configGenerate/RegenerateConfig.js";
+import { BuyServiceHandler } from "./buyService.js";
 
 // 📋 Function to list all active VPNs for the user
 async function showUserVPNs(ctx: any, userId: number) {
   const vpns = await prisma.vPN.findMany({
-    where : {
+    where: {
       userId,
       expired: false,
     },
@@ -19,14 +20,19 @@ async function showUserVPNs(ctx: any, userId: number) {
   }
 
   const keyboard = new InlineKeyboard();
-  vpns.forEach(vpn => {
-    keyboard.text(
-      `${vpn.email} (${vpn.plan?.name || "بدون پلن"})`,
+  vpns.forEach((vpn) => {
+    keyboard
+      .text(
+        `${vpn.email} (${vpn.plan?.name || "بدون پلن"})`,
         `show_vpn_${vpn.id}`
-    ).row();
+      )
+      .row();
   });
 
-  await ctx.editText("📋 لیست سرویس‌های فعال:", { reply_markup: keyboard });
+  await ctx.editText(
+    "📡 اینجا با انتخواب وی پی ان میتونید تمدیدش کنید \n مشخصاتش ببینید یا اگه کانفیگ گم کردید دوباه بگیریدش\n\n وی پی ان های فعال شما :",
+    { reply_markup: keyboard }
+  );
 }
 
 export function registerActiveServiceHandlers(bot: Bot) {
@@ -34,7 +40,7 @@ export function registerActiveServiceHandlers(bot: Bot) {
   bot.callbackQuery("active_services", async (ctx) => {
     const telegramId = ctx.from?.id;
 
-      if (!telegramId) {
+    if (!telegramId) {
       return ctx.send("❌ Unable to get Telegram ID.");
     }
 
@@ -80,6 +86,8 @@ export function registerActiveServiceHandlers(bot: Bot) {
     );
     const trafficLeft = Number(vpn.trafficLimit) - totalUsed;
 
+    const trafficInGB = Number(vpn.savedTraffic) / 1024 / 1024 / 1024;
+
     const expiryDate = vpn.expiredAt
       ? toShamsi(vpn.expiredAt)
       : "در صورت دریافت اکانت روزانه یک روز پس از تحویل";
@@ -94,12 +102,22 @@ export function registerActiveServiceHandlers(bot: Bot) {
 📦 حجم باقی‌مانده: ${(trafficLeft / 1024 ** 3).toFixed(2)} گیگ
 
 📅 تاریخ انقضا: ${expiryDate}
+
+🔄 وی پی ان تمدید شده: \n ${
+      vpn.savedDays && vpn.savedTraffic
+        ? `\n ${vpn.savedDays}روزه\n\n${trafficInGB.toFixed(2)}گیگ`
+        : `شما وی پی انی برای تمدید بعد از این نخریده اید`
+    }
     `.trim();
 
     const keyboard = new InlineKeyboard()
       .text("🔄 دریافت مجدد کانفیگ", `regen_vpn_${vpn.id}`)
-      .row()
-      .text("🔙 بازگشت", "active_services");
+      .row();
+    if (!vpn.savedDays && !vpn.savedTraffic) {
+      keyboard.text("⏰ تمدید اشتراک", `holdOver_vpn_${vpn.id}`).row();
+    }
+
+    keyboard.text("🔙 بازگشت", "active_services");
 
     await ctx.editText(message, { reply_markup: keyboard });
   });
@@ -137,10 +155,28 @@ export function registerActiveServiceHandlers(bot: Bot) {
       tls: "none",
     });
 
-    await ctxRaw.send(
-      `🔄 کانفیگ مجدد شما:\n\n<code>${config}</code>`,
-      { parse_mode: "HTML" }
-    );
+    await ctxRaw.send(`🔄 کانفیگ مجدد شما:\n\n<code>${config}</code>`, {
+      parse_mode: "HTML",
+    });
     await ctxRaw.answerCallbackQuery({ text: "📤 کانفیگ ارسال شد." });
+  });
+
+  bot.callbackQuery(/^holdOver_vpn_(\d+)$/, async (ctxRaw) => {
+    const match = (ctxRaw.queryPayload as string)?.match(
+      /^holdOver_vpn_(\d+)$/
+    );
+
+    if (!match || !match[1]) {
+      return ctxRaw.answerCallbackQuery({
+        text: "❌ VPN ID نامعتبر است.",
+        show_alert: true,
+      });
+    }
+
+    const vpnId = parseInt(match[1]);
+
+    // ✅ Pass ctxRaw into the returned handler
+    const handler = BuyServiceHandler(true, vpnId);
+    await handler(ctxRaw);
   });
 }

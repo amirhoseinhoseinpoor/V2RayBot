@@ -13,6 +13,10 @@ import { paymentAdminKeyboard } from "../../shared/keyboards/paymentAdminKeyboar
 export function registerBuyServiceHandlers(bot: Bot) {
   bot.callbackQuery(selectPlan, async (ctx) => {
     const plan = VPN_PLANS.find((p) => p.id === ctx.queryData.planId);
+
+    const holdOver = ctx.queryData.holdOver;
+    const vpnId = ctx.queryData.vpnId;
+
     if (!plan) {
       await ctx.answerCallbackQuery({ text: "این vpn درحال حاضر موجود نیست." });
       return;
@@ -37,24 +41,29 @@ vpn: ${plan.name}
       parse_mode: "Markdown",
       reply_markup: new InlineKeyboard().text(
         "↩️ بازگشت",
-        backToPlans.pack("back")
+        backToPlans.pack({ vpnId: vpnId, holdOver: holdOver })
       ),
     });
 
     const session = getSession(ctx);
     session.waitingForReceipt = {
       planId: plan.id.toString(),
+      holdOver: holdOver,
+      vpnId: vpnId,
       startedAt: Date.now(),
     };
   });
 
   bot.callbackQuery(backToPlans, async (ctx) => {
+    const holdOver = ctx.queryData.holdOver;
+    const vpnId = ctx.queryData.vpnId;
+
     const keyboard = new InlineKeyboard();
     VPN_PLANS.forEach((plan) => {
       keyboard
         .text(
           `${plan.name} - ${plan.price}T`,
-          selectPlan.pack({ planId: plan.id })
+          selectPlan.pack({ planId: plan.id, holdOver: holdOver, vpnId: vpnId })
         )
         .row();
     });
@@ -135,7 +144,8 @@ export async function handleBuyReceiptMessage(
   const session = getSession(ctx);
   if (!session.waitingForReceipt) return false;
 
-  const { planId } = session.waitingForReceipt;
+  const { planId, holdOver, vpnId } = session.waitingForReceipt;
+
   const plan = VPN_PLANS.find((p) => p.id === Number(planId));
   if (!plan) {
     await ctx.send("❌ این vpn درحال حاضر موجود نیست.");
@@ -175,7 +185,7 @@ export async function handleBuyReceiptMessage(
     chat_id: process.env.ADMIN_CHAT_ID!,
     photo: fileId,
     caption:
-      `⚠️ پرداختی جدید\n\n` +
+      `⚠️ ${holdOver ? `تمدید` : `خرید`}\n\n` +
       `👤 کاربر: ${ctx.from?.firstName || ""} (@${
         ctx.from?.username || "no-username"
       })\n` +
@@ -185,7 +195,7 @@ export async function handleBuyReceiptMessage(
       `⏳ مدت: ${plan.duration} روز\n` +
       `💰 مبلغ: ${plan.price}T\n` +
       `📝 Payment ID: ${payment.id}`,
-    reply_markup: paymentAdminKeyboard(payment.id),
+    reply_markup: paymentAdminKeyboard(payment.id , holdOver , vpnId),
   });
 
   session.waitingForReceipt = undefined;

@@ -29,7 +29,7 @@ export async function sendHoldOverMessage() {
     if (!vpn.trafficNotify && totalTraffic / Number(vpn.trafficLimit) >= 0.85) {
       await bot.api.sendMessage({
         chat_id: vpn.user.telegramId.toString(),
-        text: `⚠️ شما 85٪ از حجم VPN خود را استفاده کرده‌اید.`,
+        text: `⚠️ شما 85٪ از حجم VPN خود را استفاده کرده‌اید لطفا جهت جلوگیری از قطع شدن نسبت به تمدید اشتراک خود اقدام کنید.`,
       });
 
       await prisma.vPN.update({
@@ -46,7 +46,7 @@ export async function sendHoldOverMessage() {
         if (timeRemaining <= ONE_WEEK_MS) {
           await bot.api.sendMessage({
             chat_id: vpn.user.telegramId.toString(),
-            text: `⏳ یک هفته تا تاریخ انقضای وی پی ان شما مانده است`,
+            text: `⏳ یک هفته تا تاریخ انقضای وی پی ان شما مانده است لطفا جهت جلوگیری از قطع شدن ان را تمدید نمایید`,
           });
           await prisma.vPN.update({
             where: { id: vpn.id },

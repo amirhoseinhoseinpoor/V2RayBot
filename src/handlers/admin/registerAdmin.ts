@@ -12,6 +12,8 @@ export function registerAdminHandlers(bot: Bot) {
   // Confirm payment and create VPN
   bot.callbackQuery(confirmPayment, async (ctx) => {
     const paymentId = ctx.queryData.paymentId;
+    const holdOver = ctx.queryData.holdOver;
+    const vpnId = ctx.queryData.vpnId;
 
     // Fetch payment with relations
     const payment = await prisma.payment.findUnique({
@@ -34,74 +36,126 @@ export function registerAdminHandlers(bot: Bot) {
     const expiresAt = addDays(new Date(), payment.plan.duration);
     const shamsiDate = toShamsi(expiresAt);
 
-    try {
-      // Generate V2Ray configuration
-      const v2rayConfig = await generateConfig({
-        telegramId: payment.user.telegramId,
-        accountType: "paid",
-        trafficLimit: payment.plan.trafficGB,
-      });
+    if (holdOver && vpnId !== 0) {
+      try {
+        await prisma.vPN.update({
+          where: {
+            id: vpnId,
+          },
+          data: {
+            savedDays: payment.plan.duration,
+            savedTraffic: trafficLimit,
+          },
+        });
 
-      // Create VPN record
-      await prisma.vPN.create({
-        data: {
-          userId: payment.user.id,
-          email: v2rayConfig.email,
-          uuid: v2rayConfig.uuid,
-          type: "paid",
-          trafficLimit,
-          alterId: v2rayConfig.alterId,
-          planId: payment.plan.id,
-          expiredAt: expiresAt,
-          expired: false,
-        },
-      });
+        // Update payment status
+        await prisma.payment.update({
+          where: { id: paymentId },
+          data: { status: "confirmed" },
+        });
 
-      // Update payment status
-      await prisma.payment.update({
-        where: { id: paymentId },
-        data: { status: "confirmed" },
-      });
+        await bot.api.sendMessage({
+          chat_id: payment.user.telegramId.toString(),
+          text:
+            `🎉 تراکنش شما تایید شد شما میتونید وی پی ان تمدید شده خودتون رو در بخش سرویس های من مشاهده کنید!:\n\n` +
+            `🧩 پس از اتمام وی پی ان فعلی و پی ان تمدید شده برای شما برای همون کانفیگ فعال خواهد شد`,
+          parse_mode: "HTML",
+        });
 
-      // Send config to user
-      await bot.api.sendMessage({
-        chat_id: payment.user.telegramId.toString(),
-        text:
-          `🎉 تراکنش شما تایید شد ! اکانت پرمیوم شما:\n\n` +
-          `🧩 کانفیگ شما (با کیلیک روش کپی میشه):\n\n<code>${v2rayConfig.config}</code>\n\n` +
-          `📦 حجم: ${
-            payment.plan.trafficGB === 999
-              ? "نامحدود"
-              : `${payment.plan.trafficGB}GB`
-          }\n` +
-          `⏳ تاریخ پایان: ${shamsiDate}`,
-        parse_mode: "HTML",
-      });
-
-      // Try to edit the admin message caption to show confirmation and remove buttons
-      if (ctx.message) {
-        const originalCaption = ctx.message.caption || "";
-        try {
-          await bot.api.editMessageCaption({
-            chat_id: ctx.message.chat.id,
-            message_id: ctx.message.id,
-            caption: `${originalCaption}\n\n✅ تراکنش تایید شد #${paymentId}`,
-            parse_mode: "Markdown",
-            reply_markup: undefined,
-          });
-        } catch (error) {
-          // If editing fails (e.g. message too old), send a new message instead
-          await bot.api.sendMessage({
-            chat_id: ctx.message.chat.id,
-            text: `✅ تراکنش تایید شد #${paymentId} (نمیتوان پیام قبلی را ویرایش کرد)`,
-          });
+        if (ctx.message) {
+          const originalCaption = ctx.message.caption || "";
+          try {
+            await bot.api.editMessageCaption({
+              chat_id: ctx.message.chat.id,
+              message_id: ctx.message.id,
+              caption: `${originalCaption}\n\n✅ تراکنش تمدید تایید شد`,
+              parse_mode: "Markdown",
+              reply_markup: undefined,
+            });
+          } catch (error) {
+            // If editing fails (e.g. message too old), send a new message instead
+            await bot.api.sendMessage({
+              chat_id: ctx.message.chat.id,
+              text: `✅ تراکنش تمدید تایید شد`,
+            });
+          }
         }
+      } catch (error) {
+        console.error("VPN holdOver failed:", error);
+        await ctx.answerCallbackQuery({ text: "خطا در تمدید VPN" });
       }
+    } else {
+      try {
+        // Generate V2Ray configuration
+        const v2rayConfig = await generateConfig({
+          telegramId: payment.user.telegramId,
+          accountType: "paid",
+          trafficLimit: payment.plan.trafficGB,
+        });
 
-      await ctx.answerCallbackQuery({ text: "VPN ایجاد شد و کاربر مطلع شد!" });
-    } catch (error) {
-      console.error("VPN creation failed:", error);
-      await ctx.answerCallbackQuery({ text: "خطا در ایجاد VPN" });
+        // Create VPN record
+        await prisma.vPN.create({
+          data: {
+            userId: payment.user.id,
+            email: v2rayConfig.email,
+            uuid: v2rayConfig.uuid,
+            type: "paid",
+            trafficLimit,
+            alterId: v2rayConfig.alterId,
+            planId: payment.plan.id,
+            expiredAt: expiresAt,
+            expired: false,
+          },
+        });
+
+        // Update payment status
+        await prisma.payment.update({
+          where: { id: paymentId },
+          data: { status: "confirmed" },
+        });
+
+        // Send config to user
+        await bot.api.sendMessage({
+          chat_id: payment.user.telegramId.toString(),
+          text:
+            `🎉 تراکنش شما تایید شد ! اکانت پرمیوم شما:\n\n` +
+            `🧩 کانفیگ شما (با کیلیک روش کپی میشه):\n\n<code>${v2rayConfig.config}</code>\n\n` +
+            `📦 حجم: ${
+              payment.plan.trafficGB === 999
+                ? "نامحدود"
+                : `${payment.plan.trafficGB}GB`
+            }\n` +
+            `⏳ تاریخ پایان: ${shamsiDate}`,
+          parse_mode: "HTML",
+        });
+
+        // Try to edit the admin message caption to show confirmation and remove buttons
+        if (ctx.message) {
+          const originalCaption = ctx.message.caption || "";
+          try {
+            await bot.api.editMessageCaption({
+              chat_id: ctx.message.chat.id,
+              message_id: ctx.message.id,
+              caption: `${originalCaption}\n\n✅ تراکنش تایید شد #${paymentId}`,
+              parse_mode: "Markdown",
+              reply_markup: undefined,
+            });
+          } catch (error) {
+            // If editing fails (e.g. message too old), send a new message instead
+            await bot.api.sendMessage({
+              chat_id: ctx.message.chat.id,
+              text: `✅ تراکنش تایید شد #${paymentId} (نمیتوان پیام قبلی را ویرایش کرد)`,
+            });
+          }
+        }
+
+        await ctx.answerCallbackQuery({
+          text: "VPN ایجاد شد و کاربر مطلع شد!",
+        });
+      } catch (error) {
+        console.error("VPN creation failed:", error);
+        await ctx.answerCallbackQuery({ text: "خطا در ایجاد VPN" });
+      }
     }
   });
 
