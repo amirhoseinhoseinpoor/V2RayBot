@@ -60,6 +60,7 @@ export async function cleanTrafficLimit() {
               trafficNotify: false,
               timeNotify: false,
               trafficLimit: vpn.savedTraffic,
+              planId: vpn.savedPlanId || vpn.planId,
               savedDays: 0,
               savedTraffic: 0,
             },

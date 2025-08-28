@@ -50,6 +50,7 @@ export async function cleanExpiredVPNs() {
           createdAt: new Date(),
           trafficNotify: false,
           timeNotify: false,
+          planId: vpn.savedPlanId || vpn.planId,
           trafficLimit: vpn.savedTraffic,
           savedDays: 0,
           savedTraffic: 0,

@@ -45,6 +45,7 @@ export function registerAdminHandlers(bot: Bot) {
           data: {
             savedDays: payment.plan.duration,
             savedTraffic: trafficLimit,
+            savedPlanId: payment.plan.id,
           },
         });
 
@@ -57,8 +58,8 @@ export function registerAdminHandlers(bot: Bot) {
         await bot.api.sendMessage({
           chat_id: payment.user.telegramId.toString(),
           text:
-            `🎉 تراکنش شما تایید شد شما میتونید وی پی ان تمدید شده خودتون رو در بخش سرویس های من مشاهده کنید!:\n\n` +
-            `🧩 پس از اتمام وی پی ان فعلی و پی ان تمدید شده برای شما برای همون کانفیگ فعال خواهد شد`,
+            `🎉 تراکنش شما تایید شد شما میتونید وی پی ان رزرو شده خودتون رو در بخش سرویس های من مشاهده کنید!:\n\n` +
+            `🧩 پس از اتمام وی پی ان فعلی و پی ان رزرو شده برای شما برای همون کانفیگ فعال خواهد شد`,
           parse_mode: "HTML",
         });
 

@@ -27,7 +27,7 @@ export async function ActiveServicesHandler(ctx: MessageContext<Bot>) {
     return ctx.reply("❌ شما هیچ سرویس فعالی ندارید.");
   }
 
-  let message = "📡 اینجا با انتخواب وی پی ان میتونید تمدیدش کنید \n مشخصاتش ببینید یا اگه کانفیگ گم کردید دوباه بگیریدش\n\n وی پی ان های فعال شما :";
+  let message = "📡 اینجا با انتخاب وی پی ان میتونید تمدیدش کنید \n مشخصاتش ببینید یا اگه کانفیگ گم کردید دوباه بگیریدش\n\n وی پی ان های فعال شما :";
 
   const keyboard = new InlineKeyboard();
 
