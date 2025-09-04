@@ -11,5 +11,6 @@ export function registerMenuHandlers(bot: Bot) {
   bot.hears("🛠 پشتیبانی", SupportHandler);
   bot.hears("👨‍🏫 اموزش اتصال", TeachUserHandler);
   bot.hears("📡 سرویس های فعال من", ActiveServicesHandler);
-  bot.hears("⏰ تمدید اشتراک" , ActiveServicesHandler)
+  bot.hears("⏰ تمدید اشتراک" , ActiveServicesHandler);
+  bot.hears("🎁 دریافت جایزه vpn یک ماهه 25 گیگ رایگان" , ActiveServicesHandler);
 }

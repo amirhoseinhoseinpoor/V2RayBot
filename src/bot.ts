@@ -9,6 +9,7 @@ import { greetingScene } from "./scenes/greeting.js";
 import { paginationFor } from "@gramio/pagination/plugin";
 import { redisStorage } from "@gramio/storage-redis";
 import { redis } from "./services/redis.js";
+import { prisma } from "./db/index.js";
 
 // handler
 import { registerMenuHandlers } from "./handlers/mainMenu/index.js";
@@ -54,7 +55,38 @@ bot
 
     if (!tgUser) return;
 
+    const text = ctx.text || "";
+    const parts = text.split(" ");
+    const args = parts.length > 1 ? parts.slice(1).join(" ") : null;
+
+    // check if user already exists
+    let user = await prisma.user.findUnique({
+      where: { telegramId: tgUser.id },
+    });
+
+    const isNewUser = !user;
+
     await findOrCreateUser(tgUser);
+
+    if (isNewUser) {
+      // if this new user came with referral code
+      if (args && args.startsWith("ref")) {
+        const referrerId = parseInt(args.replace("ref", ""), 10);
+
+        if (referrerId !== tgUser.id) {
+          await prisma.user.update({
+            where: { telegramId: tgUser.id },
+            data: { referredBy: referrerId },
+          });
+
+          // notify referrer (optional)
+          await bot.api.sendMessage({
+            chat_id: referrerId,
+            text: `🎉 کاربر جدیدی با لینک شما به ربات پیوست! بعد از خرید کاربر به لیست افراد معرفی شده از طریق شما اضافه میشود و به ازای هر سه نفر یک وی پی ان رایگان یک ماهه 25 گیگ رایگان دریافت میکنید`,
+          });
+        }
+      }
+    }
 
     const name = ctx.from?.firstName || "کاربر";
 

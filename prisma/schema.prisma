@@ -9,14 +9,18 @@ datasource db {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
-  telegramId  BigInt    @unique
-  username    String?
-  firstName   String?
-  freeAccount Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  Payment     Payment[]
-  vpns        VPN[]
+  id                     Int       @id @default(autoincrement())
+  telegramId             BigInt    @unique
+  referredBy             Int? // ID of referrer                                         new
+  referralCounted        Boolean   @default(false)                                      //new
+  referralCount          Int       @default(0) // total successful referrals           //new
+  referralRewardsClaimed Int       @default(0) // how many free VPNs already claimed   new
+  username               String?
+  firstName              String?
+  freeAccount            Boolean   @default(false)
+  createdAt              DateTime  @default(now())
+  Payment                Payment[]
+  vpns                   VPN[]
 }
 
 model Plan {

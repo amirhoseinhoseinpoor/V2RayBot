@@ -81,6 +81,24 @@ export function registerAdminHandlers(bot: Bot) {
             });
           }
         }
+
+        // if user was referred and not yet counted
+        if (payment.user.referredBy && !payment.user.referralCounted) {
+          await prisma.user.update({
+            where: { telegramId: payment.user.telegramId },
+            data: {
+              referralCounted: true, // mark as counted
+            },
+          });
+
+          // increment referrer's counter
+          await prisma.user.update({
+            where: { telegramId: payment.user.referredBy },
+            data: {
+              referralCount: { increment: 1 },
+            },
+          });
+        }
       } catch (error) {
         console.error("VPN holdOver failed:", error);
         await ctx.answerCallbackQuery({ text: "خطا در تمدید VPN" });
@@ -92,6 +110,7 @@ export function registerAdminHandlers(bot: Bot) {
           telegramId: payment.user.telegramId,
           accountType: "paid",
           trafficLimit: payment.plan.trafficGB,
+          name: payment.user.username || undefined,
         });
 
         // Create VPN record
@@ -148,6 +167,24 @@ export function registerAdminHandlers(bot: Bot) {
               text: `✅ تراکنش تایید شد #${paymentId} (نمیتوان پیام قبلی را ویرایش کرد)`,
             });
           }
+        }
+
+        // if user was referred and not yet counted
+        if (payment.user.referredBy && !payment.user.referralCounted) {
+          await prisma.user.update({
+            where: { telegramId: payment.user.telegramId },
+            data: {
+              referralCounted: true, // mark as counted
+            },
+          });
+
+          // increment referrer's counter
+          await prisma.user.update({
+            where: { telegramId: payment.user.referredBy },
+            data: {
+              referralCount: { increment: 1 },
+            },
+          });
         }
 
         await ctx.answerCallbackQuery({
