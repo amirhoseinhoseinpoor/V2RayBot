@@ -2,8 +2,6 @@ import { Bot, MessageContext, InlineKeyboard } from "gramio";
 import { prisma } from "../../db/index.js";
 
 export async function FreeGiftServicesHandler(ctx: MessageContext<Bot>) {
-
-
   const tgUser = ctx.from;
   if (!tgUser) return;
 
@@ -19,12 +17,11 @@ export async function FreeGiftServicesHandler(ctx: MessageContext<Bot>) {
     "🎉 دریافت اکانت جایزه",
     `claim_reward_${user.telegramId}`
   );
-  
 
   await ctx.send(
-    `🎁 لینک دعوت اختصاصی شما:\n\n${referralLink}\n\n` +
-      `برای هر 3 نفر که با لینک شما وارد ربات شوند و اولین خرید را انجام دهند، یک اکانت 25GB رایگان دریافت می‌کنید. یعنی اگه 6 نفر با لینک شما عضو شوند و خرید کنند، شما 2 اکانت 25GB رایگان دریافت می‌کنید!\n\n` +
-    //   `👤 شما تا کنون ${user.referredCount} نفر را دعوت کرده‌اید.\n\n` +
+    `🎁 لینک دعوت اختصاصی شما:👇\n\n${referralLink}\n\n` +
+      `شما میتونید به ازای هر سه نفر که با لینک شما بیان داخل ربات و اکانت بخرن یه وی پی ان رایگان یک ماهه 25 گیگ هدیه دریافت کنید . \n اینجوری میتونید هر وقت بخواید دکمه زیر بزنید و اکانتتون رو بگیرید تا اون موقع جاش پیش ما امنه 🙂\n\n` +
+      `👤 شما تا کنون ${user.referralCount}  نفر را دعوت کرده‌اید که خرید کرده اند.\n\n` +
       `🔗 لینک خود را با دوستانتان به اشتراک بگذارید و از هدیه‌های رایگان بهره‌مند شوید!`,
     {
       reply_markup: keyboard,

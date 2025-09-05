@@ -16,6 +16,7 @@ import { registerMenuHandlers } from "./handlers/mainMenu/index.js";
 import { registerBuyServiceHandlers } from "./handlers/mainMenu/registerBuyService.js";
 import { registerAdminHandlers } from "./handlers/admin/registerAdmin.js";
 import { registerActiveServiceHandlers } from "./handlers/mainMenu/registerActiveService.js";
+import { registerFreeGiftService } from "./handlers/mainMenu/registerFreeGiftService.js";
 import { sendChatToUserHandler } from "./handlers/admin/sendChatToUser.js";
 // bot message
 import { handleAdminMessage } from "./handlers/admin/sendChatToUser.js";
@@ -110,6 +111,7 @@ registerBuyServiceHandlers(bot);
 registerAdminHandlers(bot);
 sendChatToUserHandler(bot);
 registerActiveServiceHandlers(bot);
+registerFreeGiftService(bot);
 
 bot.on("message", async (ctx) => {
   const handledBuy = await handleBuyReceiptMessage(ctx, bot);

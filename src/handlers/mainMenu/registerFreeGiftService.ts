@@ -34,7 +34,7 @@ export function registerFreeGiftService(bot: Bot) {
 
     const user = await prisma.user.findUnique({
       where: { telegramId: BigInt(userId) },
-      select: { referralCount: true, referralRewardsClaimed: true },
+      select: { id: true, referralCount: true, referralRewardsClaimed: true },
     });
 
     if (!user) {
@@ -72,7 +72,7 @@ export function registerFreeGiftService(bot: Bot) {
           email,
           uuid,
           alterId,
-          userId: userId,
+          userId: user.id,
           type: "paid",
           trafficLimit,
           planId: 2,
@@ -91,11 +91,28 @@ export function registerFreeGiftService(bot: Bot) {
           `⏳ تاریخ پایان: ${shamsiDate}`,
         parse_mode: "HTML",
       });
+
+      if (ctxRaw.message) {
+        const rewardKeyboard = new InlineKeyboard().text(
+          "🎉 دریافت اکانت جایزه",
+          `claim_reward_${userId}`
+        );
+        await ctxRaw.message.editReplyMarkup(rewardKeyboard);
+      }
     } else {
       await ctxRaw.answerCallbackQuery({
-        text: "❌ هنوز به ۳ نفر دعوتی با خرید نرسیده‌اید.",
+        text: "❌ هنوز به ۳ نفر دعوتی که خرید کرده باشن نرسیده‌اید.",
         show_alert: true,
       });
+
+      // also restore button after failure
+      if (ctxRaw.message) {
+        const rewardKeyboard = new InlineKeyboard().text(
+          "🎉 دریافت اکانت جایزه",
+          `claim_reward_${userId}`
+        );
+        await ctxRaw.message.editReplyMarkup(rewardKeyboard);
+      }
     }
   });
 }
