@@ -5,6 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     command: npm start
+    restart: unless-stopped
     volumes:
       - ./db_backups:/usr/src/app/db_backups
     environment:
