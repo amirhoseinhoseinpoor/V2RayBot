@@ -63,6 +63,7 @@ export async function cleanTrafficLimit() {
               planId: vpn.savedPlanId || vpn.planId,
               savedDays: 0,
               savedTraffic: 0,
+              savedPlanId: 0,
             },
           });
 

@@ -54,6 +54,7 @@ export async function cleanExpiredVPNs() {
           trafficLimit: vpn.savedTraffic,
           savedDays: 0,
           savedTraffic: 0,
+          savedPlanId: 0,
         },
       });
 
