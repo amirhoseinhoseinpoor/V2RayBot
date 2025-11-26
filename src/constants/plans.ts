@@ -5,7 +5,7 @@ export const VPN_PLANS = [
     name: "یک ماهه 10 گیگ",
     duration: 30,
     trafficGB: 10,
-    price: 25,
+    price: 49,
     description: "10GB اینترینت برای 30 روز",
   },
   {
@@ -13,7 +13,7 @@ export const VPN_PLANS = [
     name: "یک ماهه 25 گیگ",
     duration: 30,
     trafficGB: 25,
-    price: 65,
+    price: 110,
     description: "25GB اینترینت برای 30 روز",
   },
   {
@@ -21,7 +21,7 @@ export const VPN_PLANS = [
     name: "یک ماهه 35 گیگ",
     duration: 30,
     trafficGB: 35,
-    price: 88,
+    price: 155,
     description: "35GB اینترینت برای 30 روز",
   },
   {
@@ -29,7 +29,7 @@ export const VPN_PLANS = [
     name: "یک ماهه 50 گیگ",
     duration: 30,
     trafficGB: 50,
-    price: 130,
+    price: 205,
     description: "50GB اینترینت برای 30 روز",
   },
   {
@@ -37,7 +37,7 @@ export const VPN_PLANS = [
     name: "یک ماهه 75 گیگ",
     duration: 30,
     trafficGB: 75,
-    price: 195,
+    price: 300,
     description: "75GB اینترینت برای 30 روز",
   },
   {
@@ -45,7 +45,7 @@ export const VPN_PLANS = [
     name: "2 ماهه 25 گیگ",
     duration: 60,
     trafficGB: 25,
-    price: 110,
+    price: 130,
     description: "25GB اینترینت برای 60 روز",
   },
   {
@@ -53,7 +53,7 @@ export const VPN_PLANS = [
     name: "2 ماهه 50 گیگ",
     duration: 60,
     trafficGB: 50,
-    price: 199,
+    price: 250,
     description: "50GB اینترینت برای 60 روز",
   },
   {
@@ -61,7 +61,7 @@ export const VPN_PLANS = [
     name: "2 ماهه 75 گیگ",
     duration: 60,
     trafficGB: 75,
-    price: 270,
+    price: 350,
     description: "75GB اینترینت برای 60 روز",
   },
   {
@@ -69,7 +69,7 @@ export const VPN_PLANS = [
     name: "3 ماهه 60 گیگ",
     duration: 90,
     trafficGB: 60,
-    price: 255,
+    price: 380,
     description: "60GB اینترینت برای 90 روز",
   },
   {
@@ -77,7 +77,7 @@ export const VPN_PLANS = [
     name: "3 ماهه 100 گیگ",
     duration: 90,
     trafficGB: 100,
-    price: 360,
+    price: 465,
     description: "100GB اینترینت برای 90 روز",
   },
 ];
