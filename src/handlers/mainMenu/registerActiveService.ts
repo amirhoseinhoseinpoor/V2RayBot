@@ -150,7 +150,7 @@ export function registerActiveServiceHandlers(bot: Bot) {
       port: parseInt(process.env.V2RAY_API_PORT!),
       network: "tcp",
       type: "none",
-      host: process.env.DOMAIN_HOSTIRAN,
+      host: process.env.VPS_HOSTIRAN,
       path: "",
       tls: "none",
     });

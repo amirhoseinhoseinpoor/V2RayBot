@@ -130,7 +130,7 @@ export async function generateConfig({
     const vmess: VMessConfig = {
       v: "2",
       ps: `${accountType === "paid" ? "PremiumAccount" : "FreeAccount"}`,
-      add: process.env.DOMAIN_HOSTIRAN!,
+      add: process.env.VPS_HOSTIRAN!,
       port: port,
       id: userObject.id,
       aid: userObject.alterId,
@@ -138,7 +138,9 @@ export async function generateConfig({
       type:
         config.inbounds[inboundIndex].streamSettings?.tcpSettings?.header
           ?.type || "none",
-      host: process.env.DOMAIN_HOSTIRAN!,
+      host:
+        config.inbounds[inboundIndex].streamSettings?.tlsSettings?.serverName ||
+        "",
       path:
         config.inbounds[inboundIndex].streamSettings?.wsSettings?.path || "",
       tls: config.inbounds[inboundIndex].streamSettings?.security || "none",

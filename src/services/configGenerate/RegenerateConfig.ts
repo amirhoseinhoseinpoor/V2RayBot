@@ -40,13 +40,13 @@ export async function regenerateConfig({
   const vmess: VMessConfig = {
     v: "2",
     ps: `${accountType === "paid" ? "PremiumAccount" : "FreeAccount"}`,
-    add: process.env.DOMAIN_HOSTIRAN!, // your domain or IP
+    add: process.env.VPS_HOSTIRAN!, // your domain or IP
     port: port.toString(),
     id: uuid,
     aid: alterId,
     net: network || "tcp",
     type: type || "free",
-    host: process.env.DOMAIN_HOSTIRAN || "",
+    host: host || "",
     path: path || "",
     tls: tls || "none",
     scy: "auto",
